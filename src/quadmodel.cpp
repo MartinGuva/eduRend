@@ -13,13 +13,13 @@ QuadModel::QuadModel(
 	// Populate the vertex array with 4 Vertices
 	Vertex v0, v1, v2, v3;
 	v0.Position = { -0.5, -0.5f, 0.0f };
-	v0.Normal = { 0, 0, 1 };
+	v0.Normal = { 0, 0, -1 };
 	v0.TexCoord = { 0, 0 };
 	v1.Position = { 0.5, -0.5f, 0.0f };
 	v1.Normal = { 0, 0, 1 };
 	v1.TexCoord = { 0, 1 };
 	v2.Position = { 0.5, 0.5f, 0.0f };
-	v2.Normal = { 0, 0, 1 };
+	v2.Normal = { 0, 0, -1 };
 	v2.TexCoord = { 1, 1 };
 	v3.Position = { -0.5, 0.5f, 0.0f };
 	v3.Normal = { 0, 0, 1 };

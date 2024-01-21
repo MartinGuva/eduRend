@@ -157,8 +157,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BoxModel.h" />
     <ClInclude Include="lib\stb_image.h" />
+    <ClInclude Include="src\BoxModel.h" />
     <ClInclude Include="src\buffers.h" />
     <ClInclude Include="src\objmodel.h" />
     <ClInclude Include="src\quadmodel.h" />
@@ -178,7 +178,7 @@
     <ClInclude Include="src\window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BoxModel.cpp" />
+    <ClCompile Include="src\BoxModel.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\inputhandler.cpp" />
     <ClCompile Include="src\main.cpp" />

@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include <iostream>
 
 using namespace linalg;
 
@@ -12,6 +13,14 @@ void Camera::Move(const vec3f& direction) noexcept
 	m_position += direction;
 }
 
+void Camera::Rotate(long x, long y) noexcept
+{
+	yaw += x * sensitivity;
+	pitch += y * sensitivity;
+	m_rotation = mat4f::rotation(0, -yaw, -pitch);
+}
+
+
 mat4f Camera::WorldToViewMatrix() const noexcept
 {
 	// Assuming a camera's position and rotation is defined by matrices T(p) and R,
@@ -21,7 +30,7 @@ mat4f Camera::WorldToViewMatrix() const noexcept
 	//		inverse(T(p)*R) = inverse(R)*inverse(T(p)) = transpose(R)*T(-p)
 	// Since now there is no rotation, this matrix is simply T(-p)
 
-	return mat4f::translation(-m_position);
+	return m_rotation.inverse() * mat4f::translation(-m_position);
 }
 
 mat4f Camera::ProjectionMatrix() const noexcept

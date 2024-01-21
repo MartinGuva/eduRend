@@ -1,6 +1,7 @@
 
 #include "Scene.h"
 #include "QuadModel.h"
+#include "BoxModel.h"
 #include "OBJModel.h"
 
 Scene::Scene(
@@ -50,6 +51,13 @@ void OurTestScene::Init()
 	// Create objects
 	m_quad = new QuadModel(m_dxdevice, m_dxdevice_context);
 	m_sponza = new OBJModel("assets/crytek-sponza/sponza.obj", m_dxdevice, m_dxdevice_context);
+	m_boxModel = new BoxModel(m_dxdevice, m_dxdevice_context);
+	m_boxModel2 = new BoxModel(m_dxdevice, m_dxdevice_context);
+	m_boxModel3 = new BoxModel(m_dxdevice, m_dxdevice_context);
+	m_boxModel4 = new BoxModel(m_dxdevice, m_dxdevice_context);
+	m_boxModel5 = new BoxModel(m_dxdevice, m_dxdevice_context);
+	m_boxModel6 = new BoxModel(m_dxdevice, m_dxdevice_context);
+	m_boxModel7 = new BoxModel(m_dxdevice, m_dxdevice_context);
 }
 
 //
@@ -70,6 +78,12 @@ void OurTestScene::Update(
 	if (input_handler.IsKeyPressed(Keys::Left) || input_handler.IsKeyPressed(Keys::A))
 		m_camera->Move({ -m_camera_velocity * dt, 0.0f, 0.0f });
 
+	long mousedx = input_handler.GetMouseDeltaX();
+	long mousedy = input_handler.GetMouseDeltaY();
+
+	m_camera->Rotate(mousedx, mousedy);
+
+
 	// Now set/update object transformations
 	// This can be done using any sequence of transformation matrices,
 	// but the T*R*S order is most common; i.e. scale, then rotate, and then translate.
@@ -78,7 +92,7 @@ void OurTestScene::Update(
 
 	// Quad model-to-world transformation
 	m_quad_transform = mat4f::translation(0, 0, 0) *			// No translation
-		mat4f::rotation(-m_angle, 0.0f, 1.0f, 0.0f) *	// Rotate continuously around the y-axis
+		mat4f::rotation(0.0f, 0.0f, 1.0f, 0.0f) *	// Rotate continuously around the y-axis
 		mat4f::scaling(1.5, 1.5, 1.5);				// Scale uniformly to 150%
 
 	// Sponza model-to-world transformation
@@ -88,6 +102,50 @@ void OurTestScene::Update(
 
 	// Increment the rotation angle.
 	m_angle += m_angular_velocity * dt;
+
+	m_boxModel_transform = mat4f::translation(0, 1, -15) *
+		mat4f::rotation(0.0f, 0.0f, 1.0f, 0.0f) *
+		mat4f::scaling(2, 2, 2);
+
+	m_boxModel2_transform = mat4f::translation(0, 0, 0) 		 *
+		mat4f::rotation(-m_angle, 0.0f, 1.0f, 0.0f) *
+		mat4f::scaling(1, 1, 1);
+
+	m_boxModel3_transform = mat4f::translation(2, 0, 2) *
+		mat4f::rotation(-m_angle * 0.5f, 0.0f, 0.0f, 1.0f) *
+		mat4f::scaling(0.75, 0.75, 0.75);
+
+	m_boxModel4_transform = mat4f::translation(1, 0, 1) *
+		mat4f::rotation(0.0f, 0.0f, 0.0f, 0.0f) *
+		mat4f::scaling(0.75, 0.75, 0.75);
+
+
+
+	m_boxModel3_transform = m_boxModel2_transform * m_boxModel3_transform;
+
+	m_boxModel4_transform = m_boxModel2_transform * m_boxModel3_transform * m_boxModel4_transform;
+
+
+	m_boxModel5_transform = mat4f::translation(0, 0, 0) *
+		mat4f::rotation(0.0f, 0.0f, 0.0f, 0.0f) *
+		mat4f::scaling(1, 1, 1);
+
+	m_boxModel6_transform = mat4f::translation(0, 0, 1) *
+		mat4f::rotation(-m_angle, 1.0f, 0.0f, 0.0f) *
+		mat4f::scaling(0.80, 0.80, 0.80);
+
+	m_boxModel7_transform = mat4f::translation(0, 1, 1) *
+		mat4f::rotation(0.0f, 0.0f, 0.0f, 0.0f) *
+		mat4f::scaling(0.80f, 0.80f, 0.80f);
+
+
+	m_boxModel6_transform = m_boxModel6_transform * m_boxModel5_transform;
+
+
+	m_boxModel7_transform = m_boxModel7_transform * m_boxModel6_transform * m_boxModel5_transform;
+
+
+
 
 	// Print fps
 	m_fps_cooldown -= dt;
@@ -112,18 +170,40 @@ void OurTestScene::Render()
 	m_projection_matrix = m_camera->ProjectionMatrix();
 
 	// Load matrices + the Quad's transformation to the device and render it
-	UpdateTransformationBuffer(m_quad_transform, m_view_matrix, m_projection_matrix);
-	m_quad->Render();
+	//UpdateTransformationBuffer(m_quad_transform, m_view_matrix, m_projection_matrix);
+	//m_quad->Render();
 
-	// Load matrices + Sponza's transformation to the device and render it
 	UpdateTransformationBuffer(m_sponza_transform, m_view_matrix, m_projection_matrix);
 	m_sponza->Render();
+
+	UpdateTransformationBuffer(m_boxModel_transform, m_view_matrix, m_projection_matrix);
+	m_boxModel->Render();
+
+	UpdateTransformationBuffer(m_boxModel2_transform, m_view_matrix, m_projection_matrix);
+	m_boxModel2->Render();
+
+	UpdateTransformationBuffer(m_boxModel3_transform, m_view_matrix, m_projection_matrix);
+	m_boxModel3->Render();
+
+	UpdateTransformationBuffer(m_boxModel4_transform, m_view_matrix, m_projection_matrix);
+	m_boxModel4->Render();
+
+	UpdateTransformationBuffer(m_boxModel5_transform, m_view_matrix, m_projection_matrix);
+	m_boxModel5->Render();
+
+	UpdateTransformationBuffer(m_boxModel6_transform, m_view_matrix, m_projection_matrix);
+	m_boxModel6->Render();
+
+	UpdateTransformationBuffer(m_boxModel7_transform, m_view_matrix, m_projection_matrix);
+	m_boxModel7->Render();
 }
 
 void OurTestScene::Release()
 {
 	SAFE_DELETE(m_quad);
 	SAFE_DELETE(m_sponza);
+	SAFE_DELETE(m_boxModel);
+	SAFE_DELETE(m_boxModel2);
 	SAFE_DELETE(m_camera);
 
 	SAFE_RELEASE(m_transformation_buffer);

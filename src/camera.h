@@ -39,6 +39,12 @@ public:
 	void Move(const linalg::vec3f& direction) noexcept;
 
 	/**
+	 * @brief Move the camera along a vector
+	 * @param[in] direction Direction to move along
+	*/
+	void Rotate(long x, long y) noexcept;
+
+	/**
 	 * @brief Changes the camera aspect ratio.
 	 * @param[in] aspect_ratio New aspect ratio, calculate with width / height
 	*/
@@ -72,7 +78,12 @@ private:
 	float m_near_plane;
 	float m_far_plane;
 
+	float sensitivity = 0.001f;
+	float yaw = 0;
+	float pitch = 0;
+
 	linalg::vec3f m_position;
+	linalg::mat4f m_rotation;
 };
 
 #endif

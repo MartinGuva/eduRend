@@ -76,7 +76,7 @@
     <ClInclude Include="lib\stb_image.h">
       <Filter>Libraries</Filter>
     </ClInclude>
-    <ClInclude Include="BoxModel.h">
+    <ClInclude Include="src\BoxModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -117,7 +117,7 @@
     <ClCompile Include="src\quadmodel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BoxModel.cpp">
+    <ClCompile Include="src\BoxModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
