@@ -55,9 +55,6 @@ void OurTestScene::Init()
 	m_boxModel2 = new BoxModel(m_dxdevice, m_dxdevice_context);
 	m_boxModel3 = new BoxModel(m_dxdevice, m_dxdevice_context);
 	m_boxModel4 = new BoxModel(m_dxdevice, m_dxdevice_context);
-	m_boxModel5 = new BoxModel(m_dxdevice, m_dxdevice_context);
-	m_boxModel6 = new BoxModel(m_dxdevice, m_dxdevice_context);
-	m_boxModel7 = new BoxModel(m_dxdevice, m_dxdevice_context);
 }
 
 //
@@ -78,18 +75,16 @@ void OurTestScene::Update(
 	if (input_handler.IsKeyPressed(Keys::Left) || input_handler.IsKeyPressed(Keys::A))
 		m_camera->Move({ -m_camera_velocity * dt, 0.0f, 0.0f });
 
-	long mousedx = input_handler.GetMouseDeltaX();
-	long mousedy = input_handler.GetMouseDeltaY();
 
-	m_camera->Rotate(mousedx, mousedy);
+	m_camera->Rotate(input_handler.GetMouseDeltaX(), input_handler.GetMouseDeltaY());
 
 
+	std::cout << input_handler.GetMouseDeltaX();
 	// Now set/update object transformations
 	// This can be done using any sequence of transformation matrices,
 	// but the T*R*S order is most common; i.e. scale, then rotate, and then translate.
 	// If no transformation is desired, an identity matrix can be obtained 
 	// via e.g. Mquad = linalg::mat4f_identity; 
-
 	// Quad model-to-world transformation
 	m_quad_transform = mat4f::translation(0, 0, 0) *			// No translation
 		mat4f::rotation(0.0f, 0.0f, 1.0f, 0.0f) *	// Rotate continuously around the y-axis
@@ -100,52 +95,35 @@ void OurTestScene::Update(
 		mat4f::rotation(fPI / 2, 0.0f, 1.0f, 0.0f) * // Rotate pi/2 radians (90 degrees) around y
 		mat4f::scaling(0.05f);						 // The scene is quite large so scale it down to 5%
 
-	// Increment the rotation angle.
-	m_angle += m_angular_velocity * dt;
+
 
 	m_boxModel_transform = mat4f::translation(0, 1, -15) *
 		mat4f::rotation(0.0f, 0.0f, 1.0f, 0.0f) *
 		mat4f::scaling(2, 2, 2);
 
-	m_boxModel2_transform = mat4f::translation(0, 0, 0) 		 *
-		mat4f::rotation(-m_angle, 0.0f, 1.0f, 0.0f) *
-		mat4f::scaling(1, 1, 1);
+	mat4f box2Tra = mat4f::translation(0, 0, 0);
+	mat4f box2Rot = mat4f::rotation(0.0f, -m_angle, 0.0f);
+	mat4f box2Sca = mat4f::scaling(1, 1, 1);;
 
-	m_boxModel3_transform = mat4f::translation(2, 0, 2) *
-		mat4f::rotation(-m_angle * 0.5f, 0.0f, 0.0f, 1.0f) *
-		mat4f::scaling(0.75, 0.75, 0.75);
+	mat4f box3Tra = mat4f::translation(-2, 0, 0);
+	mat4f box3Rot = mat4f::rotation(m_angle, 0.0f, 0.0f);
+	mat4f box3Sca = mat4f::scaling(0.75, 0.75, 0.75);
 
-	m_boxModel4_transform = mat4f::translation(1, 0, 1) *
-		mat4f::rotation(0.0f, 0.0f, 0.0f, 0.0f) *
-		mat4f::scaling(0.75, 0.75, 0.75);
-
-
-
-	m_boxModel3_transform = m_boxModel2_transform * m_boxModel3_transform;
-
-	m_boxModel4_transform = m_boxModel2_transform * m_boxModel3_transform * m_boxModel4_transform;
+	mat4f box4Tra = mat4f::translation(0, 2, 0);
+	mat4f box4Rot = mat4f::rotation(0.0f, 0.0f, m_angle);
+	mat4f box4Sca = mat4f::scaling(0.75, 0.75, 0.75);;
 
 
-	m_boxModel5_transform = mat4f::translation(0, 0, 0) *
-		mat4f::rotation(0.0f, 0.0f, 0.0f, 0.0f) *
-		mat4f::scaling(1, 1, 1);
+	m_boxModel2_transform = box2Tra * box2Rot;
 
-	m_boxModel6_transform = mat4f::translation(0, 0, 1) *
-		mat4f::rotation(-m_angle, 1.0f, 0.0f, 0.0f) *
-		mat4f::scaling(0.80, 0.80, 0.80);
+	m_boxModel3_transform = (box2Tra * box2Rot * box2Sca) * (box3Tra * box3Rot * box3Sca);
 
-	m_boxModel7_transform = mat4f::translation(0, 1, 1) *
-		mat4f::rotation(0.0f, 0.0f, 0.0f, 0.0f) *
-		mat4f::scaling(0.80f, 0.80f, 0.80f);
-
-
-	m_boxModel6_transform = m_boxModel6_transform * m_boxModel5_transform;
-
-
-	m_boxModel7_transform = m_boxModel7_transform * m_boxModel6_transform * m_boxModel5_transform;
+	m_boxModel4_transform = (box2Tra * box2Rot * box2Sca) * (box3Tra * box3Rot * box3Sca) * (box4Tra * box4Rot * box4Sca);
 
 
 
+	// Increment the rotation angle.
+	m_angle += m_angular_velocity * dt;
 
 	// Print fps
 	m_fps_cooldown -= dt;
@@ -174,7 +152,7 @@ void OurTestScene::Render()
 	//m_quad->Render();
 
 	UpdateTransformationBuffer(m_sponza_transform, m_view_matrix, m_projection_matrix);
-	m_sponza->Render();
+	//m_sponza->Render();
 
 	UpdateTransformationBuffer(m_boxModel_transform, m_view_matrix, m_projection_matrix);
 	m_boxModel->Render();
@@ -187,15 +165,6 @@ void OurTestScene::Render()
 
 	UpdateTransformationBuffer(m_boxModel4_transform, m_view_matrix, m_projection_matrix);
 	m_boxModel4->Render();
-
-	UpdateTransformationBuffer(m_boxModel5_transform, m_view_matrix, m_projection_matrix);
-	m_boxModel5->Render();
-
-	UpdateTransformationBuffer(m_boxModel6_transform, m_view_matrix, m_projection_matrix);
-	m_boxModel6->Render();
-
-	UpdateTransformationBuffer(m_boxModel7_transform, m_view_matrix, m_projection_matrix);
-	m_boxModel7->Render();
 }
 
 void OurTestScene::Release()
@@ -204,6 +173,8 @@ void OurTestScene::Release()
 	SAFE_DELETE(m_sponza);
 	SAFE_DELETE(m_boxModel);
 	SAFE_DELETE(m_boxModel2);
+	SAFE_DELETE(m_boxModel3);
+	SAFE_DELETE(m_boxModel4);
 	SAFE_DELETE(m_camera);
 
 	SAFE_RELEASE(m_transformation_buffer);

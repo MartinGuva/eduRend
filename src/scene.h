@@ -91,13 +91,8 @@ class OurTestScene : public Scene
 	Model* m_boxModel;
 	Model* m_boxModel2;
 	Model* m_boxModel3;
-
-
-
 	Model* m_boxModel4;
-	Model* m_boxModel5;
-	Model* m_boxModel6;
-	Model* m_boxModel7;
+
 
 	mat4f m_sponza_transform;
 	mat4f m_quad_transform;
@@ -106,9 +101,6 @@ class OurTestScene : public Scene
 	mat4f m_boxModel2_transform;
 	mat4f m_boxModel3_transform;
 	mat4f m_boxModel4_transform;
-	mat4f m_boxModel5_transform;
-	mat4f m_boxModel6_transform;
-	mat4f m_boxModel7_transform;
 
 	mat4f m_view_matrix;
 	mat4f m_projection_matrix;

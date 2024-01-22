@@ -38,10 +38,7 @@ public:
 	*/
 	void Move(const linalg::vec3f& direction) noexcept;
 
-	/**
-	 * @brief Move the camera along a vector
-	 * @param[in] direction Direction to move along
-	*/
+
 	void Rotate(long x, long y) noexcept;
 
 	/**
