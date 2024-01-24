@@ -79,8 +79,13 @@ private:
 	float yaw = 0;
 	float pitch = 0;
 
+	float clampMin = -1.0f;
+	float clampMax = 1.0f;
+
 	linalg::vec3f m_position;
 	linalg::mat4f m_rotation;
+
+
 };
 
 #endif

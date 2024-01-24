@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include <iostream>
+#include <algorithm>
 
 using namespace linalg;
 
@@ -17,6 +18,10 @@ void Camera::Rotate(long x, long y) noexcept
 {
 	yaw += x * sensitivity;
 	pitch += y * sensitivity;
+
+
+	pitch = clamp(pitch, clampMin, clampMax);
+	std::cout << pitch << std::endl;
 	m_rotation = mat4f::rotation(0, -yaw, -pitch);
 }
 
