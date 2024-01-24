@@ -101,7 +101,7 @@ void OurTestScene::Update(
 		mat4f::rotation(0.0f, 0.0f, 1.0f, 0.0f) *
 		mat4f::scaling(2, 2, 2);
 
-	mat4f box2Tra = mat4f::translation(0, 0, 0);
+	mat4f box2Tra = mat4f::translation(0, 0, 20);
 	mat4f box2Rot = mat4f::rotation(0.0f, -m_angle, 0.0f);
 	mat4f box2Sca = mat4f::scaling(1, 1, 1);;
 
@@ -111,7 +111,7 @@ void OurTestScene::Update(
 
 	mat4f box4Tra = mat4f::translation(0, 2, 0);
 	mat4f box4Rot = mat4f::rotation(0.0f, 0.0f, m_angle);
-	mat4f box4Sca = mat4f::scaling(0.75, 0.75, 0.75);;
+	mat4f box4Sca = mat4f::scaling(0.5, 0.5, 0.5);
 
 
 	m_boxModel2_transform = box2Tra * box2Rot;

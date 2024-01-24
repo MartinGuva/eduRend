@@ -46,35 +46,35 @@ BoxModel::BoxModel(
 
 
 	v0.Normal = { 0, 0, 1 };
-	v1.Normal = { 1, 0, 0 };
+	v1.Normal = { -1, 0, 0 };
 	v2.Normal = { 0, -1, 0 };
 
 	v3.Normal = { 0, 0, 1 };
-	v4.Normal = { -1, 0, 0 };
+	v4.Normal = { 1, 0, 0 };
 	v5.Normal = { 0, -1, 0 };
 
-	v6.Normal = { 1, 0, 0 };
+	v6.Normal = { -1, 0, 0 };
 	v7.Normal = { 0, 0, -1 };
 	v8.Normal = { 0, -1, 0 };
 
 	v9.Normal = { 0, 0, -1 };
-	v10.Normal = { -1, 0, 0 };
+	v10.Normal = { 1, 0, 0 };
 	v11.Normal = { 0, -1, 0 };
 
 	v12.Normal = { 0, 0, 1 };
-	v13.Normal = { 1, 0, 0 };
+	v13.Normal = { -1, 0, 0 };
 	v14.Normal = { 0, 1, 0 };
 
 	v15.Normal = {0, 0, 1 };
-	v16.Normal = { -1, 0, 0 };
+	v16.Normal = { 1, 0, 0 };
 	v17.Normal = { 0, 1, 0 };
 
-	v18.Normal = { 1, 0, 0 };
+	v18.Normal = { -1, 0, 0 };
 	v19.Normal = { 0, 0, -1 };
 	v20.Normal = { 0, 1, 0 };
 
 	v21.Normal = { 0, 0, -1 };
-	v22.Normal = { -1, 0, 0 };
+	v22.Normal = { 1, 0, 0 };
 	v23.Normal = { 0, 1, 0 };
 
 

@@ -102,6 +102,7 @@ class OurTestScene : public Scene
 	mat4f m_boxModel3_transform;
 	mat4f m_boxModel4_transform;
 
+
 	mat4f m_view_matrix;
 	mat4f m_projection_matrix;
 
