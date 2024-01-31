@@ -11,7 +11,20 @@ void Camera::MoveTo(const vec3f& position) noexcept
 
 void Camera::Move(const vec3f& direction) noexcept
 {
-	m_position += direction;
+	vec3f newDir;
+	newDir = direction * WorldToViewMatrix().get_3x3();
+	newDir.y = 0;
+
+	//std::cout << "Without 3x3: " << std::endl;
+	//std::cout << WorldToViewMatrix() << std::endl;
+	//std::cout << "With 3x3: " << std::endl;
+	//std::cout << WorldToViewMatrix().get_3x3() << std::endl;
+
+	//std::cout << "New dir without normalize: " << std::endl;
+	//std::cout << newDir << std::endl;
+	//std::cout << "New dir with normalize: " << std::endl;
+	//std::cout << newDir.normalize() << std::endl;
+	m_position += newDir;
 }
 
 void Camera::Rotate(long x, long y) noexcept
@@ -19,9 +32,8 @@ void Camera::Rotate(long x, long y) noexcept
 	yaw += x * sensitivity;
 	pitch += y * sensitivity;
 
-
 	pitch = clamp(pitch, clampMin, clampMax);
-	std::cout << pitch << std::endl;
+
 	m_rotation = mat4f::rotation(0, -yaw, -pitch);
 }
 
@@ -34,8 +46,9 @@ mat4f Camera::WorldToViewMatrix() const noexcept
 	// World-to-View then is the inverse of T(p)*R;
 	//		inverse(T(p)*R) = inverse(R)*inverse(T(p)) = transpose(R)*T(-p)
 	// Since now there is no rotation, this matrix is simply T(-p)
-
-	return m_rotation.inverse() * mat4f::translation(-m_position);
+	mat4f rotation = m_rotation;
+	rotation.transpose();
+	return rotation * mat4f::translation(-m_position);
 }
 
 mat4f Camera::ProjectionMatrix() const noexcept

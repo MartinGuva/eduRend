@@ -31,6 +31,7 @@ OurTestScene::OurTestScene(
 	Scene(dxdevice, dxdevice_context, window_width, window_height)
 { 
 	InitTransformationBuffer();
+	InitLightCamBuffer();
 	// + init other CBuffers
 }
 
@@ -51,6 +52,7 @@ void OurTestScene::Init()
 	// Create objects
 	m_quad = new QuadModel(m_dxdevice, m_dxdevice_context);
 	m_sponza = new OBJModel("assets/crytek-sponza/sponza.obj", m_dxdevice, m_dxdevice_context);
+	m_trojan = new OBJModel("assets/Trojan/Trojan.obj", m_dxdevice, m_dxdevice_context);
 	m_boxModel = new BoxModel(m_dxdevice, m_dxdevice_context);
 	m_boxModel2 = new BoxModel(m_dxdevice, m_dxdevice_context);
 	m_boxModel3 = new BoxModel(m_dxdevice, m_dxdevice_context);
@@ -65,6 +67,8 @@ void OurTestScene::Update(
 	float dt,
 	const InputHandler& input_handler)
 {
+
+	m_camera->Rotate(input_handler.GetMouseDeltaX(), input_handler.GetMouseDeltaY());
 	// Basic camera control
 	if (input_handler.IsKeyPressed(Keys::Up) || input_handler.IsKeyPressed(Keys::W))
 		m_camera->Move({ 0.0f, 0.0f, -m_camera_velocity * dt });
@@ -76,10 +80,6 @@ void OurTestScene::Update(
 		m_camera->Move({ -m_camera_velocity * dt, 0.0f, 0.0f });
 
 
-	m_camera->Rotate(input_handler.GetMouseDeltaX(), input_handler.GetMouseDeltaY());
-
-
-	std::cout << input_handler.GetMouseDeltaX();
 	// Now set/update object transformations
 	// This can be done using any sequence of transformation matrices,
 	// but the T*R*S order is most common; i.e. scale, then rotate, and then translate.
@@ -95,23 +95,30 @@ void OurTestScene::Update(
 		mat4f::rotation(fPI / 2, 0.0f, 1.0f, 0.0f) * // Rotate pi/2 radians (90 degrees) around y
 		mat4f::scaling(0.05f);						 // The scene is quite large so scale it down to 5%
 
-
+	m_trojan_transform = mat4f::translation(-5, 0, -15);	 // Move down 5 units
 
 	m_boxModel_transform = mat4f::translation(0, -3, -15) *
-		mat4f::rotation(0.0f, 0.0f, 1.0f, 0.0f) *
+		mat4f::rotation(0.0f, 90.0f, 0.0f) *
 		mat4f::scaling(2, 2, 2);
 
+	
+
 	mat4f box2Tra = mat4f::translation(0, 0, 20);
-	mat4f box2Rot = mat4f::rotation(0.0f, -m_angle, 0.0f);
+	//mat4f box2Rot = mat4f::rotation(0.0f, -m_angle, 0.0f);
+	mat4f box2Rot = mat4f::rotation(0.0f, 0.0f, 0.0f);
 	mat4f box2Sca = mat4f::scaling(1, 1, 1);;
 
 	mat4f box3Tra = mat4f::translation(-2, 0, 0);
-	mat4f box3Rot = mat4f::rotation(m_angle, 0.0f, 0.0f);
+	//mat4f box3Rot = mat4f::rotation(m_angle, 0.0f, 0.0f);
+	mat4f box3Rot = mat4f::rotation(0.0f, 0.0f, 0.0f);
 	mat4f box3Sca = mat4f::scaling(0.75, 0.75, 0.75);
 
 	mat4f box4Tra = mat4f::translation(0, 2, 0);
-	mat4f box4Rot = mat4f::rotation(0.0f, 0.0f, m_angle);
+	//mat4f box4Rot = mat4f::rotation(0.0f, 0.0f, m_angle);
+	mat4f box4Rot = mat4f::rotation(0.0f, 0.0f, 0.0f);
 	mat4f box4Sca = mat4f::scaling(0.5, 0.5, 0.5);
+
+	light_Transform = vec4f(0, 0, lightPosZ, 0);
 
 
 	m_boxModel2_transform = box2Tra * box2Rot;
@@ -124,6 +131,13 @@ void OurTestScene::Update(
 
 	// Increment the rotation angle.
 	m_angle += m_angular_velocity * dt;
+	//lightPosZ += lightSpeed * dt;
+	lightPosZ = 0;
+
+	if (lightPosZ > 100)
+	{
+		lightPosZ = -100;
+	}
 
 	// Print fps
 	m_fps_cooldown -= dt;
@@ -143,16 +157,26 @@ void OurTestScene::Render()
 	// Bind transformation_buffer to slot b0 of the VS
 	m_dxdevice_context->VSSetConstantBuffers(0, 1, &m_transformation_buffer);
 
+	
+
 	// Obtain the matrices needed for rendering from the camera
 	m_view_matrix = m_camera->WorldToViewMatrix();
 	m_projection_matrix = m_camera->ProjectionMatrix();
 
 	// Load matrices + the Quad's transformation to the device and render it
+	
+
+	m_dxdevice_context->PSSetConstantBuffers(0, 1, &lightCam_buffer);
+
+
 	UpdateTransformationBuffer(m_quad_transform, m_view_matrix, m_projection_matrix);
-	//m_quad->Render();
+	m_quad->Render();
 
 	UpdateTransformationBuffer(m_sponza_transform, m_view_matrix, m_projection_matrix);
 	m_sponza->Render();
+
+	UpdateTransformationBuffer(m_trojan_transform, m_view_matrix, m_projection_matrix);
+	m_trojan->Render();
 
 	UpdateTransformationBuffer(m_boxModel_transform, m_view_matrix, m_projection_matrix);
 	m_boxModel->Render();
@@ -165,6 +189,9 @@ void OurTestScene::Render()
 
 	UpdateTransformationBuffer(m_boxModel4_transform, m_view_matrix, m_projection_matrix);
 	m_boxModel4->Render();
+
+	UpdateLightCamBuffer(light_Transform,  vec4f(m_camera->m_position, 1));
+	
 }
 
 void OurTestScene::Release()
@@ -176,8 +203,10 @@ void OurTestScene::Release()
 	SAFE_DELETE(m_boxModel3);
 	SAFE_DELETE(m_boxModel4);
 	SAFE_DELETE(m_camera);
+	SAFE_DELETE(m_trojan);
 
 	SAFE_RELEASE(m_transformation_buffer);
+	SAFE_RELEASE(lightCam_buffer);
 	// + release other CBuffers
 }
 
@@ -218,3 +247,29 @@ void OurTestScene::UpdateTransformationBuffer(
 	matrixBuffer->ProjectionMatrix = ProjectionMatrix;
 	m_dxdevice_context->Unmap(m_transformation_buffer, 0);
 }
+
+void OurTestScene::InitLightCamBuffer()
+{
+	HRESULT hr;
+	D3D11_BUFFER_DESC lightCamBufferDesc = { 0 };
+	lightCamBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightCamBufferDesc.ByteWidth = sizeof(LightCamBuffer);
+	lightCamBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightCamBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightCamBufferDesc.MiscFlags = 0;
+	lightCamBufferDesc.StructureByteStride = 0;
+	ASSERT(hr = m_dxdevice->CreateBuffer(&lightCamBufferDesc, nullptr, &lightCam_buffer));
+}
+
+
+void OurTestScene::UpdateLightCamBuffer(vec4f lightPos, vec4f camPos)
+{
+	// Map the resource buffer, obtain a pointer and then write our vectors to it
+	D3D11_MAPPED_SUBRESOURCE resource;
+	m_dxdevice_context->Map(lightCam_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+	LightCamBuffer* lightCamBufferData = (LightCamBuffer*)resource.pData;
+	lightCamBufferData->lightPos = lightPos;
+	lightCamBufferData->camPos = camPos;
+	m_dxdevice_context->Unmap(lightCam_buffer, 0);
+}
+

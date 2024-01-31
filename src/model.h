@@ -15,6 +15,7 @@
 #include "Drawcall.h"
 #include "OBJLoader.h"
 #include "Texture.h"
+#include "buffers.h"
 
 using namespace linalg;
 
@@ -31,7 +32,14 @@ protected:
 	// Pointers to the class' vertex & index arrays
 	ID3D11Buffer* m_vertex_buffer = nullptr; //!< Pointer to gpu side vertex buffer
 	ID3D11Buffer* m_index_buffer = nullptr; //!< Pointer to gpu side index buffer
+	ID3D11Buffer* m_material_buffer = nullptr;
 
+	std::vector<Material> m_materials;
+
+
+
+	virtual void UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular) const = 0;
+	virtual void InitMaterialBuffer() = 0;
 public:
 
 	/**
@@ -47,6 +55,7 @@ public:
 	*/
 	virtual void Render() const = 0;
 
+
 	/**
 	 * @brief Destructor.
 	 * @details Releases the vertex and index buffers of the Model.
@@ -55,6 +64,7 @@ public:
 	{ 
 		SAFE_RELEASE(m_vertex_buffer);
 		SAFE_RELEASE(m_index_buffer);
+		SAFE_RELEASE(m_material_buffer);
 	}
 };
 

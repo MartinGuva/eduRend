@@ -13,13 +13,13 @@ QuadModel::QuadModel(
 	// Populate the vertex array with 4 Vertices
 	Vertex v0, v1, v2, v3;
 	v0.Position = { -0.5, -0.5f, 0.0f };
-	v0.Normal = { 0, 0, -1 };
+	v0.Normal = { 0, 0, 1 };
 	v0.TexCoord = { 0, 0 };
 	v1.Position = { 0.5, -0.5f, 0.0f };
 	v1.Normal = { 0, 0, 1 };
 	v1.TexCoord = { 0, 1 };
 	v2.Position = { 0.5, 0.5f, 0.0f };
-	v2.Normal = { 0, 0, -1 };
+	v2.Normal = { 0, 0, 1 };
 	v2.TexCoord = { 1, 1 };
 	v3.Position = { -0.5, 0.5f, 0.0f };
 	v3.Normal = { 0, 0, 1 };
@@ -68,6 +68,17 @@ QuadModel::QuadModel(
 	SETNAME(m_index_buffer, "IndexBuffer");
 
 	m_number_of_indices = (unsigned int)indices.size();
+
+	Material material = Material();
+
+	material.AmbientColour = linalg::vec3f(0, 1, 0);
+	material.DiffuseColour = linalg::vec3f(0.5, 0.5, 0.5);
+	material.SpecularColour = linalg::vec3f(0, 0.8, 0);
+
+	m_materials.push_back(material);
+
+	InitMaterialBuffer();
+
 }
 
 
@@ -83,4 +94,40 @@ void QuadModel::Render() const
 
 	// Make the drawcall
 	m_dxdevice_context->DrawIndexed(m_number_of_indices, 0, 0);
+
+
+	//UpdateMaterialBuffer(linalg::vec4f(m_materials[0].AmbientColour, 0), linalg::vec4f(m_materials[0].DiffuseColour, 0), linalg::vec4f(m_materials[0].SpecularColour, 0));
+
+	for (auto& material : m_materials)
+	{
+		UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 0), linalg::vec4f(material.DiffuseColour, 0), linalg::vec4f(material.SpecularColour, 0));
+	}
+
+	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
+}
+
+void QuadModel::InitMaterialBuffer()
+{
+	HRESULT hr;
+	D3D11_BUFFER_DESC materialBufferDesc = { 0 };
+	materialBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	materialBufferDesc.ByteWidth = sizeof(MaterialBuffer);
+	materialBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	materialBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	materialBufferDesc.MiscFlags = 0;
+	materialBufferDesc.StructureByteStride = 0;
+	ASSERT(hr = m_dxdevice->CreateBuffer(&materialBufferDesc, nullptr, &m_material_buffer));
+}
+
+
+void QuadModel::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular) const
+{
+	// Map the resource buffer, obtain a pointer and then write our vectors to it
+	D3D11_MAPPED_SUBRESOURCE resource;
+	m_dxdevice_context->Map(m_material_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+	MaterialBuffer* materialBufferData = (MaterialBuffer*)resource.pData;
+	materialBufferData->ambientColor = ambient;
+	materialBufferData->diffuseColor = diffuse;
+	materialBufferData->specularColor = specular;
+	m_dxdevice_context->Unmap(m_material_buffer, 0);
 }

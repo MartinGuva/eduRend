@@ -60,6 +60,7 @@ public:
 	 * @note In a performance sensitive situation this matrix should be precomputed if possible
 	*/
 	linalg::mat4f ProjectionMatrix() const noexcept;
+	linalg::vec3f m_position;
 
 private:
 	// Aperture attributes
@@ -82,7 +83,7 @@ private:
 	float clampMin = -1.0f;
 	float clampMax = 1.0f;
 
-	linalg::vec3f m_position;
+	
 	linalg::mat4f m_rotation;
 
 

@@ -214,7 +214,19 @@ BoxModel::BoxModel(
 	dxdevice->CreateBuffer(&indexbufferDesc, &indexData, &m_index_buffer);
 	SETNAME(m_index_buffer, "IndexBuffer");
 
+	InitMaterialBuffer();
+
 	m_number_of_indices = (unsigned int)indices.size();
+
+	Material material = Material();
+
+	material.AmbientColour = linalg::vec3f(1, 0, 0);
+	material.DiffuseColour = linalg::vec3f(0.5, 0, 0);
+	material.SpecularColour = linalg::vec3f(0.8, 0, 0);
+
+	m_materials.push_back(material);
+
+	
 }
 
 
@@ -230,4 +242,40 @@ void BoxModel::Render() const
 
 	// Make the drawcall
 	m_dxdevice_context->DrawIndexed(m_number_of_indices, 0, 0);
+
+
+	for (auto& material : m_materials)
+	{
+		UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 0), linalg::vec4f(material.DiffuseColour, 0), linalg::vec4f(material.SpecularColour, 0));
+	}
+	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
+	//m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
+
+
+}
+
+void BoxModel::InitMaterialBuffer()
+{
+	HRESULT hr;
+	D3D11_BUFFER_DESC materialBufferDesc = { 0 };
+	materialBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	materialBufferDesc.ByteWidth = sizeof(MaterialBuffer);
+	materialBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	materialBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	materialBufferDesc.MiscFlags = 0;
+	materialBufferDesc.StructureByteStride = 0;
+	ASSERT(hr = m_dxdevice->CreateBuffer(&materialBufferDesc, nullptr, &m_material_buffer));
+}
+
+
+void BoxModel::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular) const
+{
+	// Map the resource buffer, obtain a pointer and then write our vectors to it
+	D3D11_MAPPED_SUBRESOURCE resource;
+	m_dxdevice_context->Map(m_material_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+	MaterialBuffer* materialBufferData = (MaterialBuffer*)resource.pData;
+	materialBufferData->ambientColor = ambient;
+	materialBufferData->diffuseColor = diffuse;
+	materialBufferData->specularColor = specular;
+	m_dxdevice_context->Unmap(m_material_buffer, 0);
 }

@@ -26,6 +26,8 @@ public:
 	 * @brief Render the model.
 	*/
 	virtual void Render() const;
+	virtual void UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular) const;
+	virtual void InitMaterialBuffer();
 
 	/**
 	 *@brief Destructor. 

@@ -78,6 +78,7 @@ class OurTestScene : public Scene
 
 	// CBuffer for transformation matrices
 	ID3D11Buffer* m_transformation_buffer = nullptr;
+	ID3D11Buffer* lightCam_buffer = nullptr;
 	// + other CBuffers
 
 	//
@@ -87,6 +88,7 @@ class OurTestScene : public Scene
 
 	Model* m_quad;
 	Model* m_sponza;
+	Model* m_trojan;
 
 	Model* m_boxModel;
 	Model* m_boxModel2;
@@ -96,6 +98,9 @@ class OurTestScene : public Scene
 
 	mat4f m_sponza_transform;
 	mat4f m_quad_transform;
+	mat4f m_trojan_transform;
+
+	vec4f light_Transform;
 
 	mat4f m_boxModel_transform;
 	mat4f m_boxModel2_transform;
@@ -112,8 +117,13 @@ class OurTestScene : public Scene
 	float m_camera_velocity = 5.0f;	// Camera movement velocity in units/s
 	float m_fps_cooldown = 0;
 
-	void InitTransformationBuffer();
+	float lightSpeed = 10;
+	float lightPosZ = -100;
 
+	void InitTransformationBuffer();
+	void InitLightCamBuffer();
+
+	void UpdateLightCamBuffer(vec4f lightPos, vec4f camPos);
 	void UpdateTransformationBuffer(mat4f model_to_world_matrix, mat4f world_to_view_matrix, mat4f projection_matrix);
 
 public:
