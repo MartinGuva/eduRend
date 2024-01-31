@@ -71,9 +71,9 @@ QuadModel::QuadModel(
 
 	Material material = Material();
 
-	material.AmbientColour = linalg::vec3f(0, 1, 0);
-	material.DiffuseColour = linalg::vec3f(0.5, 0.5, 0.5);
-	material.SpecularColour = linalg::vec3f(0, 0.8, 0);
+	material.AmbientColour = linalg::vec3f((0.0f, 0.0f, 0.2f));
+	material.DiffuseColour = linalg::vec3f(0.0f, 0.0f, 1.0f);
+	material.SpecularColour = linalg::vec3f(1.0f, 1.0f, 1.0f);
 
 	m_materials.push_back(material);
 
@@ -98,11 +98,11 @@ void QuadModel::Render() const
 
 	//UpdateMaterialBuffer(linalg::vec4f(m_materials[0].AmbientColour, 0), linalg::vec4f(m_materials[0].DiffuseColour, 0), linalg::vec4f(m_materials[0].SpecularColour, 0));
 
-	for (auto& material : m_materials)
-	{
-		UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 0), linalg::vec4f(material.DiffuseColour, 0), linalg::vec4f(material.SpecularColour, 0));
-	}
-
+	//for (auto& material : m_materials)
+	//{
+	//	UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 0), linalg::vec4f(material.DiffuseColour, 0), linalg::vec4f(material.SpecularColour, 0));
+	//}
+	UpdateMaterialBuffer(linalg::vec4f(m_materials[0].AmbientColour, 1), linalg::vec4f(m_materials[0].DiffuseColour, 1), linalg::vec4f(m_materials[0].SpecularColour, 1));
 	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
 }
 

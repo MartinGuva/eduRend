@@ -95,30 +95,30 @@ void OurTestScene::Update(
 		mat4f::rotation(fPI / 2, 0.0f, 1.0f, 0.0f) * // Rotate pi/2 radians (90 degrees) around y
 		mat4f::scaling(0.05f);						 // The scene is quite large so scale it down to 5%
 
-	m_trojan_transform = mat4f::translation(-5, 0, -15);	 // Move down 5 units
+	m_trojan_transform = mat4f::translation(-5, -2, -30);
 
 	m_boxModel_transform = mat4f::translation(0, -3, -15) *
-		mat4f::rotation(0.0f, 90.0f, 0.0f) *
+		mat4f::rotation(0.0f, 0.0f, 0.0f) *
 		mat4f::scaling(2, 2, 2);
 
 	
 
 	mat4f box2Tra = mat4f::translation(0, 0, 20);
-	//mat4f box2Rot = mat4f::rotation(0.0f, -m_angle, 0.0f);
-	mat4f box2Rot = mat4f::rotation(0.0f, 0.0f, 0.0f);
+	mat4f box2Rot = mat4f::rotation(0.0f, -m_angle, 0.0f);
+	//mat4f box2Rot = mat4f::rotation(0.0f, 0.0f, 0.0f);
 	mat4f box2Sca = mat4f::scaling(1, 1, 1);;
 
 	mat4f box3Tra = mat4f::translation(-2, 0, 0);
-	//mat4f box3Rot = mat4f::rotation(m_angle, 0.0f, 0.0f);
-	mat4f box3Rot = mat4f::rotation(0.0f, 0.0f, 0.0f);
+	mat4f box3Rot = mat4f::rotation(m_angle, 0.0f, 0.0f);
+	//mat4f box3Rot = mat4f::rotation(0.0f, 0.0f, 0.0f);
 	mat4f box3Sca = mat4f::scaling(0.75, 0.75, 0.75);
 
 	mat4f box4Tra = mat4f::translation(0, 2, 0);
-	//mat4f box4Rot = mat4f::rotation(0.0f, 0.0f, m_angle);
-	mat4f box4Rot = mat4f::rotation(0.0f, 0.0f, 0.0f);
+	mat4f box4Rot = mat4f::rotation(0.0f, 0.0f, m_angle);
+	//mat4f box4Rot = mat4f::rotation(0.0f, 0.0f, 0.0f);
 	mat4f box4Sca = mat4f::scaling(0.5, 0.5, 0.5);
 
-	light_Transform = vec4f(0, 0, lightPosZ, 0);
+	
 
 
 	m_boxModel2_transform = box2Tra * box2Rot;
@@ -131,13 +131,15 @@ void OurTestScene::Update(
 
 	// Increment the rotation angle.
 	m_angle += m_angular_velocity * dt;
-	//lightPosZ += lightSpeed * dt;
-	lightPosZ = 0;
+	lightPosZ += lightSpeed * dt;
+	//lightPosZ = 0;
 
 	if (lightPosZ > 100)
 	{
 		lightPosZ = -100;
 	}
+
+	light_Transform = vec4f(0, 0, lightPosZ, 0);
 
 	// Print fps
 	m_fps_cooldown -= dt;

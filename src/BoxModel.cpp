@@ -1,5 +1,6 @@
 #include "BoxModel.h"
 
+
 BoxModel::BoxModel(
 	ID3D11Device* dxdevice,
 	ID3D11DeviceContext* dxdevice_context)
@@ -214,19 +215,19 @@ BoxModel::BoxModel(
 	dxdevice->CreateBuffer(&indexbufferDesc, &indexData, &m_index_buffer);
 	SETNAME(m_index_buffer, "IndexBuffer");
 
-	InitMaterialBuffer();
+	
 
 	m_number_of_indices = (unsigned int)indices.size();
 
 	Material material = Material();
 
-	material.AmbientColour = linalg::vec3f(1, 0, 0);
-	material.DiffuseColour = linalg::vec3f(0.5, 0, 0);
-	material.SpecularColour = linalg::vec3f(0.8, 0, 0);
+	material.AmbientColour = linalg::vec3f((0.0f, 0.0f, 0.2f));
+	material.DiffuseColour = linalg::vec3f(0.0f, 0.0f, 1.0f);
+	material.SpecularColour = linalg::vec3f(1.0f, 1.0f, 1.0f);
 
 	m_materials.push_back(material);
 
-	
+	InitMaterialBuffer();
 }
 
 
@@ -246,7 +247,7 @@ void BoxModel::Render() const
 
 	for (auto& material : m_materials)
 	{
-		UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 0), linalg::vec4f(material.DiffuseColour, 0), linalg::vec4f(material.SpecularColour, 0));
+		UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 1), linalg::vec4f(material.DiffuseColour, 1), linalg::vec4f(material.SpecularColour, 1));
 	}
 	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
 	//m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);

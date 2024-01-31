@@ -113,12 +113,14 @@ void OBJModel::Render() const
 		// Make the drawcall
 		m_dxdevice_context->DrawIndexed(indexRange.Size, indexRange.Start, 0);
 
-		
+
 	}
 
-	UpdateMaterialBuffer(linalg::vec4f((1, 0, 0), 0), linalg::vec4f((0.5, 0, 0), 0), linalg::vec4f((0.8, 0, 0), 0));
+	UpdateMaterialBuffer(linalg::vec4f((0.0f, 0.0f, 0.2f), 1), linalg::vec4f((0.0f, 0.0f, 1.0f), 1), linalg::vec4f((1, 1, 1), 1));
 
 	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
+
+	
 	
 	
 	for (auto& material : m_materials)
