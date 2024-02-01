@@ -80,8 +80,8 @@ private:
 	float yaw = 0;
 	float pitch = 0;
 
-	float clampMin = -1.0f;
-	float clampMax = 1.0f;
+	float clampMouseMin = -1.0f;
+	float clampMouseMax = 1.0f;
 
 	
 	linalg::mat4f m_rotation;

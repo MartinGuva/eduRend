@@ -71,8 +71,8 @@ QuadModel::QuadModel(
 
 	Material material = Material();
 
-	material.AmbientColour = linalg::vec3f((0.0f, 0.0f, 0.2f));
-	material.DiffuseColour = linalg::vec3f(0.0f, 0.0f, 1.0f);
+	material.AmbientColour = linalg::vec3f((0.0f, 0.0f, 0.4f));
+	material.DiffuseColour = linalg::vec3f(0.0f, 0.0f, 0.6f);
 	material.SpecularColour = linalg::vec3f(1.0f, 1.0f, 1.0f);
 
 	m_materials.push_back(material);
@@ -91,19 +91,19 @@ void QuadModel::Render() const
 
 	// Bind our index buffer
 	m_dxdevice_context->IASetIndexBuffer(m_index_buffer, DXGI_FORMAT_R32_UINT, 0);
-
+	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
 	// Make the drawcall
+	
+
+	for (auto& material : m_materials)
+	{
+		UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 0), linalg::vec4f(material.DiffuseColour, 0), linalg::vec4f(material.SpecularColour, 20));
+	}
+	
+
 	m_dxdevice_context->DrawIndexed(m_number_of_indices, 0, 0);
 
-
-	//UpdateMaterialBuffer(linalg::vec4f(m_materials[0].AmbientColour, 0), linalg::vec4f(m_materials[0].DiffuseColour, 0), linalg::vec4f(m_materials[0].SpecularColour, 0));
-
-	//for (auto& material : m_materials)
-	//{
-	//	UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 0), linalg::vec4f(material.DiffuseColour, 0), linalg::vec4f(material.SpecularColour, 0));
-	//}
-	UpdateMaterialBuffer(linalg::vec4f(m_materials[0].AmbientColour, 1), linalg::vec4f(m_materials[0].DiffuseColour, 1), linalg::vec4f(m_materials[0].SpecularColour, 1));
-	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
+	
 }
 
 void QuadModel::InitMaterialBuffer()

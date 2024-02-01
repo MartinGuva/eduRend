@@ -3,7 +3,7 @@
 // Adapted from:
 // https://github-wiki-see.page/m/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
 //
-
+//
 #include "Texture.h"
 
 #pragma warning (push, 1)

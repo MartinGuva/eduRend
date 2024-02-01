@@ -89,6 +89,7 @@ class OurTestScene : public Scene
 	Model* m_quad;
 	Model* m_sponza;
 	Model* m_trojan;
+	Model* m_woodDoll;
 
 	Model* m_boxModel;
 	Model* m_boxModel2;
@@ -99,6 +100,7 @@ class OurTestScene : public Scene
 	mat4f m_sponza_transform;
 	mat4f m_quad_transform;
 	mat4f m_trojan_transform;
+	mat4f m_woodDoll_transform;
 
 	vec4f light_Transform;
 

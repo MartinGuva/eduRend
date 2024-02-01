@@ -53,6 +53,7 @@ void OurTestScene::Init()
 	m_quad = new QuadModel(m_dxdevice, m_dxdevice_context);
 	m_sponza = new OBJModel("assets/crytek-sponza/sponza.obj", m_dxdevice, m_dxdevice_context);
 	m_trojan = new OBJModel("assets/Trojan/Trojan.obj", m_dxdevice, m_dxdevice_context);
+	m_woodDoll = new OBJModel("assets/wooddoll/wooddoll.obj", m_dxdevice, m_dxdevice_context);
 	m_boxModel = new BoxModel(m_dxdevice, m_dxdevice_context);
 	m_boxModel2 = new BoxModel(m_dxdevice, m_dxdevice_context);
 	m_boxModel3 = new BoxModel(m_dxdevice, m_dxdevice_context);
@@ -97,6 +98,9 @@ void OurTestScene::Update(
 
 	m_trojan_transform = mat4f::translation(-5, -2, -30);
 
+	m_woodDoll_transform = mat4f::translation(-5, -2, 10) *
+		mat4f::scaling(4);
+
 	m_boxModel_transform = mat4f::translation(0, -3, -15) *
 		mat4f::rotation(0.0f, 0.0f, 0.0f) *
 		mat4f::scaling(2, 2, 2);
@@ -118,9 +122,6 @@ void OurTestScene::Update(
 	//mat4f box4Rot = mat4f::rotation(0.0f, 0.0f, 0.0f);
 	mat4f box4Sca = mat4f::scaling(0.5, 0.5, 0.5);
 
-	
-
-
 	m_boxModel2_transform = box2Tra * box2Rot;
 
 	m_boxModel3_transform = (box2Tra * box2Rot * box2Sca) * (box3Tra * box3Rot * box3Sca);
@@ -132,7 +133,7 @@ void OurTestScene::Update(
 	// Increment the rotation angle.
 	m_angle += m_angular_velocity * dt;
 	lightPosZ += lightSpeed * dt;
-	//lightPosZ = 0;
+	lightPosZ = 0;
 
 	if (lightPosZ > 100)
 	{
@@ -159,26 +160,28 @@ void OurTestScene::Render()
 	// Bind transformation_buffer to slot b0 of the VS
 	m_dxdevice_context->VSSetConstantBuffers(0, 1, &m_transformation_buffer);
 
-	
-
 	// Obtain the matrices needed for rendering from the camera
 	m_view_matrix = m_camera->WorldToViewMatrix();
 	m_projection_matrix = m_camera->ProjectionMatrix();
 
 	// Load matrices + the Quad's transformation to the device and render it
-	
+
 
 	m_dxdevice_context->PSSetConstantBuffers(0, 1, &lightCam_buffer);
 
+	UpdateLightCamBuffer(light_Transform, vec4f(m_camera->m_position, 1));
 
-	UpdateTransformationBuffer(m_quad_transform, m_view_matrix, m_projection_matrix);
-	m_quad->Render();
+	//UpdateTransformationBuffer(m_quad_transform, m_view_matrix, m_projection_matrix);
+	//m_quad->Render();
 
 	UpdateTransformationBuffer(m_sponza_transform, m_view_matrix, m_projection_matrix);
 	m_sponza->Render();
 
 	UpdateTransformationBuffer(m_trojan_transform, m_view_matrix, m_projection_matrix);
 	m_trojan->Render();
+
+	UpdateTransformationBuffer(m_woodDoll_transform, m_view_matrix, m_projection_matrix);
+	m_woodDoll->Render();
 
 	UpdateTransformationBuffer(m_boxModel_transform, m_view_matrix, m_projection_matrix);
 	m_boxModel->Render();
@@ -191,9 +194,6 @@ void OurTestScene::Render()
 
 	UpdateTransformationBuffer(m_boxModel4_transform, m_view_matrix, m_projection_matrix);
 	m_boxModel4->Render();
-
-	UpdateLightCamBuffer(light_Transform,  vec4f(m_camera->m_position, 1));
-	
 }
 
 void OurTestScene::Release()

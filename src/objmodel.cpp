@@ -99,6 +99,7 @@ void OBJModel::Render() const
 
 	// Bind index buffer
 	m_dxdevice_context->IASetIndexBuffer(m_index_buffer, DXGI_FORMAT_R32_UINT, 0);
+	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
 
 	// Iterate Drawcalls
 	for (auto& indexRange : m_index_ranges)
@@ -108,25 +109,12 @@ void OBJModel::Render() const
 
 		// Bind diffuse texture to slot t0 of the PS
 		m_dxdevice_context->PSSetShaderResources(0, 1, &material.DiffuseTexture.TextureView);
-		// + bind other textures here, e.g. a normal map, to appropriate slots
+		// + bind other textures here, e.g. a normal map, to appropriate slots'
 
+		UpdateMaterialBuffer(linalg::vec4f(m_materials[indexRange.MaterialIndex].AmbientColour, 1), linalg::vec4f(m_materials[indexRange.MaterialIndex].DiffuseColour, 1), linalg::vec4f(m_materials[indexRange.MaterialIndex].SpecularColour, 20));
+		
 		// Make the drawcall
 		m_dxdevice_context->DrawIndexed(indexRange.Size, indexRange.Start, 0);
-
-
-	}
-
-	UpdateMaterialBuffer(linalg::vec4f((0.0f, 0.0f, 0.2f), 1), linalg::vec4f((0.0f, 0.0f, 1.0f), 1), linalg::vec4f((1, 1, 1), 1));
-
-	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
-
-	
-	
-	
-	for (auto& material : m_materials)
-	{
-
-
 	}
 	
 }
