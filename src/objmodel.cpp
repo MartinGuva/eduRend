@@ -29,6 +29,14 @@ OBJModel::OBJModel(
 		indexOffset = (unsigned int)indices.size();
 	}
 
+	for (int i = 0; i < indices.size(); i += 3)
+	{
+		compute_TB(
+			mesh->Vertices[indices[i + 0]],
+			mesh->Vertices[indices[i + 1]],
+			mesh->Vertices[indices[i + 2]]);
+	}
+
 	// Vertex array descriptor
 	D3D11_BUFFER_DESC vertexbufferDesc = { 0 };
 	vertexbufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -58,6 +66,8 @@ OBJModel::OBJModel(
 	SETNAME(m_index_buffer, "IndexBuffer");
 
 	
+
+	
 	// Copy materials from mesh
 	append_materials(mesh->Materials);
 
@@ -73,16 +83,29 @@ OBJModel::OBJModel(
 
 			hr = LoadTextureFromFile(
 				dxdevice,
+				dxdevice_context,
 				material.DiffuseTextureFilename.c_str(),
 				&material.DiffuseTexture);
 			std::cout << "\t" << material.DiffuseTextureFilename
 				<< (SUCCEEDED(hr) ? " - OK" : "- FAILED") << std::endl;
 		}
 
-		// + other texture types here - see Material class
-		// ...
+		if (material.NormalTextureFilename.size()) {
+
+			hr = LoadTextureFromFile(
+				dxdevice,
+				dxdevice_context,
+				material.NormalTextureFilename.c_str(),
+				&material.NormalTexture);
+			std::cout << "\t" << material.DiffuseTextureFilename
+				<< (SUCCEEDED(hr) ? " - OK" : "- FAILED") << std::endl;
+		}
+
 	}
 	std::cout << "Done." << std::endl;
+
+
+
 	InitMaterialBuffer();
 
 
@@ -99,7 +122,7 @@ void OBJModel::Render() const
 
 	// Bind index buffer
 	m_dxdevice_context->IASetIndexBuffer(m_index_buffer, DXGI_FORMAT_R32_UINT, 0);
-	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
+	m_dxdevice_context->PSSetConstantBuffers(0, 1, &m_material_buffer);
 
 	// Iterate Drawcalls
 	for (auto& indexRange : m_index_ranges)
@@ -109,9 +132,10 @@ void OBJModel::Render() const
 
 		// Bind diffuse texture to slot t0 of the PS
 		m_dxdevice_context->PSSetShaderResources(0, 1, &material.DiffuseTexture.TextureView);
+		m_dxdevice_context->PSSetShaderResources(1, 1, &material.NormalTexture.TextureView);
 		// + bind other textures here, e.g. a normal map, to appropriate slots'
 
-		UpdateMaterialBuffer(linalg::vec4f(m_materials[indexRange.MaterialIndex].AmbientColour, 1), linalg::vec4f(m_materials[indexRange.MaterialIndex].DiffuseColour, 1), linalg::vec4f(m_materials[indexRange.MaterialIndex].SpecularColour, 20));
+		UpdateMaterialBuffer(linalg::vec4f(m_materials[indexRange.MaterialIndex].AmbientColour, 1), linalg::vec4f(m_materials[indexRange.MaterialIndex].DiffuseColour, 1), linalg::vec4f(m_materials[indexRange.MaterialIndex].SpecularColour, 2));
 		
 		// Make the drawcall
 		m_dxdevice_context->DrawIndexed(indexRange.Size, indexRange.Start, 0);
@@ -124,6 +148,7 @@ OBJModel::~OBJModel()
 	for (auto& material : m_materials)
 	{
 		SAFE_RELEASE(material.DiffuseTexture.TextureView);
+		SAFE_RELEASE(material.NormalTexture.TextureView);
 
 		// Release other used textures ...
 	}

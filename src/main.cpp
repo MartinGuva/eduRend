@@ -118,6 +118,8 @@ int WINAPI wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPWSTR, _I
 					{ "TEX", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			};
 
+
+
 			if(FAILED(create_shader(device, "shaders/vertex_shader.hlsl", "VS_main", SHADER_VERTEX, &inputDesc[0], 5, &vertexShader)))
 			{
 				// Can't continue the program if the shader fails to load.

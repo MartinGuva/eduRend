@@ -17,13 +17,13 @@ QuadModel::QuadModel(
 	v0.TexCoord = { 0, 0 };
 	v1.Position = { 0.5, -0.5f, 0.0f };
 	v1.Normal = { 0, 0, 1 };
-	v1.TexCoord = { 0, 1 };
+	v1.TexCoord = { 1, 0 };
 	v2.Position = { 0.5, 0.5f, 0.0f };
 	v2.Normal = { 0, 0, 1 };
 	v2.TexCoord = { 1, 1 };
 	v3.Position = { -0.5, 0.5f, 0.0f };
 	v3.Normal = { 0, 0, 1 };
-	v3.TexCoord = { 1, 0 };
+	v3.TexCoord = { 0, 1 };
 	vertices.push_back(v0);
 	vertices.push_back(v1);
 	vertices.push_back(v2);
@@ -75,6 +75,22 @@ QuadModel::QuadModel(
 	material.DiffuseColour = linalg::vec3f(0.0f, 0.0f, 0.6f);
 	material.SpecularColour = linalg::vec3f(1.0f, 1.0f, 1.0f);
 
+	HRESULT hr;
+	hr = LoadTextureFromFile(
+		dxdevice,
+		"assets/textures/brick_diffuse.png",
+		&material.DiffuseTexture);
+	std::cout << "\t" << material.DiffuseTextureFilename
+		<< (SUCCEEDED(hr) ? " - OK" : "- FAILED") << std::endl;
+
+	hr = LoadTextureFromFile(
+		dxdevice,
+		dxdevice_context,
+		"assets/textures/brick_bump.png",
+		&material.NormalTexture);
+	std::cout << "\t" << material.DiffuseTextureFilename
+		<< (SUCCEEDED(hr) ? " - OK" : "- FAILED") << std::endl;
+
 	m_materials.push_back(material);
 
 	InitMaterialBuffer();
@@ -92,6 +108,8 @@ void QuadModel::Render() const
 	// Bind our index buffer
 	m_dxdevice_context->IASetIndexBuffer(m_index_buffer, DXGI_FORMAT_R32_UINT, 0);
 	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
+	m_dxdevice_context->PSSetShaderResources(0, 1, &m_materials[0].DiffuseTexture.TextureView);
+	m_dxdevice_context->PSSetShaderResources(1, 1, &m_materials[0].NormalTexture.TextureView);
 	// Make the drawcall
 	
 

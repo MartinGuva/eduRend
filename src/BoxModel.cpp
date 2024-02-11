@@ -80,34 +80,34 @@ BoxModel::BoxModel(
 
 
 	v0.TexCoord = { 0, 0 };
-	v1.TexCoord = { 0, 1 };
-	v2.TexCoord = { 1, 0 };
+	v1.TexCoord = { 1, 0 };
+	v2.TexCoord = { 0, 1 };
 
-	v3.TexCoord = { 0, 1 };
+	v3.TexCoord = { 1, 0 };
 	v4.TexCoord = { 0, 0 };
 	v5.TexCoord = { 1, 1 };
 
 	v6.TexCoord = { 0, 0 };
-	v7.TexCoord = { 0, 1 };
+	v7.TexCoord = { 1, 0 };
 	v8.TexCoord = { 0, 0 };
 
 	v9.TexCoord = { 0, 0 };
-	v10.TexCoord = { 0, 1 };
-	v11.TexCoord = { 0, 1 };
+	v10.TexCoord = { 1, 0 };
+	v11.TexCoord = { 1, 0 };
 
-	v12.TexCoord = { 1, 0 };
+	v12.TexCoord = { 0, 1 };
 	v13.TexCoord = { 1, 1 };
 	v14.TexCoord = { 0, 0 };
 
 	v15.TexCoord = { 1, 1 };
-	v16.TexCoord = { 1, 0 };
-	v17.TexCoord = { 0, 1 };
+	v16.TexCoord = { 0, 1 };
+	v17.TexCoord = { 1, 0 };
 
-	v18.TexCoord = { 1, 0 };
+	v18.TexCoord = { 0, 1 };
 	v19.TexCoord = { 1, 1 };
-	v20.TexCoord = { 1, 0 };
+	v20.TexCoord = { 0, 1 };
 
-	v21.TexCoord = { 1, 0 };
+	v21.TexCoord = { 0, 1 };
 	v22.TexCoord = { 1, 1 };
 	v23.TexCoord = { 1, 1 };
 
@@ -135,6 +135,11 @@ BoxModel::BoxModel(
 	vertices.push_back(v21);
 	vertices.push_back(v22);
 	vertices.push_back(v23);
+
+	//for (int i = 0; i < 24; i++)
+	//{
+	//	vertices[i].TexCoord *= 2;
+	//}
 
 
 	// Populate the index array with 12 triangles
@@ -187,6 +192,15 @@ BoxModel::BoxModel(
 	indices.push_back(20);
 	indices.push_back(17);
 
+
+	for (int i = 0; i < indices.size(); i += 3)
+	{
+		compute_TB(vertices[indices[i + 0]],
+			vertices[indices[i + 1]],
+			vertices[indices[i + 2]]);
+
+	}
+
 	// Vertex array descriptor
 	D3D11_BUFFER_DESC vertexbufferDesc{ 0 };
 	vertexbufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -223,10 +237,32 @@ BoxModel::BoxModel(
 	material.AmbientColour = linalg::vec3f((0.0f, 0.0f, 0.4f));
 	material.DiffuseColour = linalg::vec3f(0.0f, 0.0f, 0.6f);
 	material.SpecularColour = linalg::vec3f(1.0f, 1.0f, 1.0f);
+	HRESULT hr;
+	hr = LoadTextureFromFile(
+		dxdevice,
+		dxdevice_context,
+		"assets/textures/brick_diffuse.png",
+		&material.DiffuseTexture);
+	std::cout << "\t" << material.DiffuseTextureFilename
+		<< (SUCCEEDED(hr) ? " - OK" : "- FAILED") << std::endl;
+
+
+
+
+	hr = LoadTextureFromFile(
+		dxdevice,
+		dxdevice_context,
+		"assets/textures/brick_bump.png",
+		&material.NormalTexture);
+	std::cout << "\t" << material.DiffuseTextureFilename
+		<< (SUCCEEDED(hr) ? " - OK" : "- FAILED") << std::endl;
 
 	m_materials.push_back(material);
 
+
+
 	InitMaterialBuffer();
+
 }
 
 
@@ -239,7 +275,9 @@ void BoxModel::Render() const
 
 	// Bind our index buffer
 	m_dxdevice_context->IASetIndexBuffer(m_index_buffer, DXGI_FORMAT_R32_UINT, 0);
-	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
+	m_dxdevice_context->PSSetConstantBuffers(0, 1, &m_material_buffer);
+	m_dxdevice_context->PSSetShaderResources(0, 1, &m_materials[0].DiffuseTexture.TextureView);
+	m_dxdevice_context->PSSetShaderResources(1, 1, &m_materials[0].NormalTexture.TextureView);
 
 	// Make the drawcall
 
@@ -249,10 +287,6 @@ void BoxModel::Render() const
 	}
 
 	m_dxdevice_context->DrawIndexed(m_number_of_indices, 0, 0);
-
-	
-
-
 }
 
 void BoxModel::InitMaterialBuffer()

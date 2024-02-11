@@ -32,6 +32,10 @@ OurTestScene::OurTestScene(
 { 
 	InitTransformationBuffer();
 	InitLightCamBuffer();
+	D3D11_SAMPLER_DESC samplerdesc = UpdateFilter(D3D11_FILTER_MIN_MAG_MIP_POINT);
+	m_dxdevice->CreateSamplerState(&samplerdesc, &sampler);
+	m_dxdevice_context->PSSetSamplers(0, 1, &sampler);
+	//m_dxdevice_context->PSSetSamplers(1, 1, &sampler);
 	// + init other CBuffers
 }
 
@@ -58,6 +62,37 @@ void OurTestScene::Init()
 	m_boxModel2 = new BoxModel(m_dxdevice, m_dxdevice_context);
 	m_boxModel3 = new BoxModel(m_dxdevice, m_dxdevice_context);
 	m_boxModel4 = new BoxModel(m_dxdevice, m_dxdevice_context);
+
+
+
+
+}
+
+D3D11_SAMPLER_DESC OurTestScene::UpdateFilter(D3D11_FILTER filter)
+{
+	if (sampler)
+	{
+		SAFE_RELEASE(sampler)
+		sampler = nullptr;
+	}
+
+	D3D11_SAMPLER_DESC samplerdesc =
+	{
+	filter, // Filter
+	D3D11_TEXTURE_ADDRESS_WRAP, // AddressU
+	D3D11_TEXTURE_ADDRESS_WRAP, // AddressV
+	D3D11_TEXTURE_ADDRESS_WRAP, // AddressW
+	0.0f, // MipLODBias
+	16, // MaxAnisotropy
+	D3D11_COMPARISON_NEVER, // ComapirsonFunc
+	{ 1.0f, 1.0f, 1.0f, 1.0f }, // BorderColor
+	-FLT_MAX, // MinLOD
+	FLT_MAX, // MaxLOD
+	};
+	
+
+	return samplerdesc;
+
 }
 
 //
@@ -67,7 +102,26 @@ void OurTestScene::Init()
 void OurTestScene::Update(
 	float dt,
 	const InputHandler& input_handler)
-{
+	{
+
+	if (input_handler.IsKeyPressed(Keys::P))
+	{
+		D3D11_SAMPLER_DESC samplerdesc = UpdateFilter(D3D11_FILTER_MIN_MAG_MIP_POINT);
+		m_dxdevice->CreateSamplerState(&samplerdesc, &sampler);
+		m_dxdevice_context->PSSetSamplers(0, 1, &sampler);
+	}
+	else if (input_handler.IsKeyPressed(Keys::L))
+	{
+		D3D11_SAMPLER_DESC samplerdesc = UpdateFilter(D3D11_FILTER_MIN_MAG_MIP_LINEAR);
+		m_dxdevice->CreateSamplerState(&samplerdesc, &sampler);
+		m_dxdevice_context->PSSetSamplers(0, 1, &sampler);
+	}
+	else if (input_handler.IsKeyPressed(Keys::O))
+	{
+		D3D11_SAMPLER_DESC samplerdesc = UpdateFilter(D3D11_FILTER_ANISOTROPIC);
+		m_dxdevice->CreateSamplerState(&samplerdesc, &sampler);
+		m_dxdevice_context->PSSetSamplers(0, 1, &sampler);
+	}
 
 	m_camera->Rotate(input_handler.GetMouseDeltaX(), input_handler.GetMouseDeltaY());
 	// Basic camera control
@@ -87,7 +141,7 @@ void OurTestScene::Update(
 	// If no transformation is desired, an identity matrix can be obtained 
 	// via e.g. Mquad = linalg::mat4f_identity; 
 	// Quad model-to-world transformation
-	m_quad_transform = mat4f::translation(0, 0, 0) *			// No translation
+	m_quad_transform = mat4f::translation(0, 0, -5) *			// No translation
 		mat4f::rotation(-m_angle, 0.0f, 1.0f, 0.0f) *	// Rotate continuously around the y-axis
 		mat4f::scaling(1.5, 1.5, 1.5);				// Scale uniformly to 150%
 
@@ -160,6 +214,9 @@ void OurTestScene::Render()
 	// Bind transformation_buffer to slot b0 of the VS
 	m_dxdevice_context->VSSetConstantBuffers(0, 1, &m_transformation_buffer);
 
+
+	m_dxdevice_context->VSSetConstantBuffers(0, 1, &m_transformation_buffer);
+	
 	// Obtain the matrices needed for rendering from the camera
 	m_view_matrix = m_camera->WorldToViewMatrix();
 	m_projection_matrix = m_camera->ProjectionMatrix();
@@ -171,8 +228,8 @@ void OurTestScene::Render()
 
 	UpdateLightCamBuffer(light_Transform, vec4f(m_camera->m_position, 1));
 
-	//UpdateTransformationBuffer(m_quad_transform, m_view_matrix, m_projection_matrix);
-	//m_quad->Render();
+	UpdateTransformationBuffer(m_quad_transform, m_view_matrix, m_projection_matrix);
+	m_quad->Render();
 
 	UpdateTransformationBuffer(m_sponza_transform, m_view_matrix, m_projection_matrix);
 	m_sponza->Render();
@@ -207,8 +264,11 @@ void OurTestScene::Release()
 	SAFE_DELETE(m_camera);
 	SAFE_DELETE(m_trojan);
 
+
 	SAFE_RELEASE(m_transformation_buffer);
 	SAFE_RELEASE(lightCam_buffer);
+
+	SAFE_RELEASE(sampler);
 	// + release other CBuffers
 }
 

@@ -79,6 +79,8 @@ class OurTestScene : public Scene
 	// CBuffer for transformation matrices
 	ID3D11Buffer* m_transformation_buffer = nullptr;
 	ID3D11Buffer* lightCam_buffer = nullptr;
+
+	ID3D11SamplerState* sampler = nullptr;
 	// + other CBuffers
 
 	//
@@ -142,6 +144,8 @@ public:
 	 * @brief Initializes all resources held by the scene.
 	*/
 	void Init() override;
+
+	D3D11_SAMPLER_DESC UpdateFilter(D3D11_FILTER filter);
 
 	/**
 	 * @brief Updates all ojects in the scene

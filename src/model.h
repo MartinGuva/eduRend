@@ -55,6 +55,37 @@ public:
 	*/
 	virtual void Render() const = 0;
 
+	void compute_TB(Vertex& v0, Vertex& v1, Vertex& v2) const
+	{
+		vec3f tangent, binormal;
+
+		vec3f D = v1.Position - v0.Position;
+		vec3f E = v2.Position - v0.Position;
+		vec2f F = v1.TexCoord - v0.TexCoord;
+		vec2f G = v2.TexCoord - v0.TexCoord;
+
+		float inverse = 1.0f / (F.x * G.y - G.x * F.y);
+
+		tangent.x = inverse * (G.y * D.x - F.y * E.x);
+		tangent.y = inverse * (G.y * D.y - F.y * E.y);
+		tangent.z = inverse * (G.y * D.z - F.y * E.z);
+		tangent = normalize(tangent);
+
+		binormal.x = inverse * (-G.x * D.x + F.x * E.x);
+		binormal.y = inverse * (-G.x * D.y + F.x * E.y);
+		binormal.z = inverse * (-G.x * D.z + F.x * E.z);
+		binormal = normalize(binormal);
+
+
+		// Now assign the newly computed vectors to the vertices
+		v0.Tangent = tangent;
+		v1.Tangent = tangent;
+		v2.Tangent = tangent;
+		v0.Binormal = binormal;
+		v1.Binormal = binormal;
+		v2.Binormal = binormal;
+	}
+
 
 	/**
 	 * @brief Destructor.
