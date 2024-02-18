@@ -1,7 +1,6 @@
-#include "BoxModel.h"
+#include "skybox.h"
 
-
-BoxModel::BoxModel(
+Skybox::Skybox(
 	ID3D11Device* dxdevice,
 	ID3D11DeviceContext* dxdevice_context)
 	: Model(dxdevice, dxdevice_context)
@@ -66,7 +65,7 @@ BoxModel::BoxModel(
 	v13.Normal = { -1, 0, 0 };
 	v14.Normal = { 0, 1, 0 };
 
-	v15.Normal = {0, 0, 1 };
+	v15.Normal = { 0, 0, 1 };
 	v16.Normal = { 1, 0, 0 };
 	v17.Normal = { 0, 1, 0 };
 
@@ -192,14 +191,31 @@ BoxModel::BoxModel(
 	indices.push_back(20);
 	indices.push_back(17);
 
-
 	for (int i = 0; i < indices.size(); i += 3)
 	{
-		compute_TB(vertices[indices[i + 0]],
-			vertices[indices[i + 1]],
-			vertices[indices[i + 2]]);
-
+		Swap(indices[i], indices[i + 2]);
 	}
+
+	for (int i = 0; i < vertices.size(); ++i)
+	{
+		vertices[i].Normal = -vertices[i].Normal;
+	}
+
+	for (int i = 0; i < vertices.size(); ++i)
+	{
+		vertices[i].TexCoord = -vertices[i].TexCoord;
+	}
+
+
+	//for (int i = 0; i < indices.size(); i += 3)
+	//{
+	//	compute_TB(vertices[indices[i + 0]],
+	//		vertices[indices[i + 1]],
+	//		vertices[indices[i + 2]]);
+
+	//}
+
+
 
 	// Vertex array descriptor
 	D3D11_BUFFER_DESC vertexbufferDesc{ 0 };
@@ -229,30 +245,35 @@ BoxModel::BoxModel(
 	dxdevice->CreateBuffer(&indexbufferDesc, &indexData, &m_index_buffer);
 	SETNAME(m_index_buffer, "IndexBuffer");
 
-	
+
 	m_number_of_indices = (unsigned int)indices.size();
 
 	Material material = Material();
 
-	material.AmbientColour = linalg::vec3f((0.0f, 0.6f, 0.0f));
-	material.DiffuseColour = linalg::vec3f(0.0f, 0.5f, 0.0f);
+	material.AmbientColour = linalg::vec3f((0.0f, 0.0f, 0.4f));
+	material.DiffuseColour = linalg::vec3f(0.0f, 0.0f, 0.6f);
 	material.SpecularColour = linalg::vec3f(1.0f, 1.0f, 1.0f);
-	HRESULT hr;
-	hr = LoadTextureFromFile(
-		dxdevice,
-		dxdevice_context,
-		"assets/textures/brick_diffuse.png",
-		&material.DiffuseTexture);
-	std::cout << "\t" << material.DiffuseTextureFilename
-		<< (SUCCEEDED(hr) ? " - OK" : "- FAILED") << std::endl;
 
-	hr = LoadTextureFromFile(
+
+	const char* cube_filenames[6] =
+	{
+	   "assets/cubemaps/brightday/posx.png",
+	   "assets/cubemaps/brightday/negx.png",
+	   "assets/cubemaps/brightday/negy.png",
+	   "assets/cubemaps/brightday/posy.png",
+	   "assets/cubemaps/brightday/posz.png",
+	   "assets/cubemaps/brightday/negz.png"
+	};
+
+
+	HRESULT hr = LoadCubeTextureFromFile(
 		dxdevice,
-		dxdevice_context,
-		"assets/textures/brick_bump.png",
-		&material.NormalTexture);
-	std::cout << "\t" << material.DiffuseTextureFilename
-		<< (SUCCEEDED(hr) ? " - OK" : "- FAILED") << std::endl;
+		cube_filenames,
+		&cube_texture);
+	if (SUCCEEDED(hr)) std::cout << "Cubemap OK" << std::endl;
+	else std::cout << "Cubemap failed to load" << std::endl;
+
+
 
 	m_materials.push_back(material);
 
@@ -263,7 +284,7 @@ BoxModel::BoxModel(
 }
 
 
-void BoxModel::Render() const
+void Skybox::Render() const
 {
 	// Bind our vertex buffer
 	const UINT32 stride = sizeof(Vertex); //  sizeof(float) * 8;
@@ -272,32 +293,25 @@ void BoxModel::Render() const
 
 	// Bind our index buffer
 	m_dxdevice_context->IASetIndexBuffer(m_index_buffer, DXGI_FORMAT_R32_UINT, 0);
-	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
 
-	m_dxdevice_context->PSSetShaderResources(0, 1, &m_materials[0].DiffuseTexture.TextureView);
-	m_dxdevice_context->PSSetShaderResources(1, 1, &m_materials[0].NormalTexture.TextureView);
-
-	// Make the drawcall
+	m_dxdevice_context->PSSetShaderResources(2, 1, &cube_texture.TextureView);
 
 	for (auto& material : m_materials)
 	{
 		UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 1), linalg::vec4f(material.DiffuseColour, 1), linalg::vec4f(material.SpecularColour, 20));
 	}
 
+
 	m_dxdevice_context->DrawIndexed(m_number_of_indices, 0, 0);
 }
 
-BoxModel::~BoxModel()
+Skybox::~Skybox()
 {
-	for (auto& material : m_materials)
-	{
-		SAFE_RELEASE(material.DiffuseTexture.TextureView);
-		SAFE_RELEASE(material.NormalTexture.TextureView);
 
-	}
+	SAFE_RELEASE(cube_texture.TextureView);
 }
 
-void BoxModel::InitMaterialBuffer()
+void Skybox::InitMaterialBuffer()
 {
 	HRESULT hr;
 	D3D11_BUFFER_DESC materialBufferDesc = { 0 };
@@ -310,8 +324,15 @@ void BoxModel::InitMaterialBuffer()
 	ASSERT(hr = m_dxdevice->CreateBuffer(&materialBufferDesc, nullptr, &m_material_buffer));
 }
 
+void Skybox::Swap(unsigned& a, unsigned& b)
+{
+	int temp = a;
+	a = b;
+	b = temp;
+}
 
-void BoxModel::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular) const
+
+void Skybox::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular) const
 {
 	// Map the resource buffer, obtain a pointer and then write our vectors to it
 	D3D11_MAPPED_SUBRESOURCE resource;

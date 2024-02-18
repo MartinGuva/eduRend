@@ -124,6 +124,16 @@ void QuadModel::Render() const
 	
 }
 
+QuadModel::~QuadModel()
+{
+	for (auto& material : m_materials)
+	{
+		SAFE_RELEASE(material.DiffuseTexture.TextureView);
+		SAFE_RELEASE(material.NormalTexture.TextureView);
+
+	}
+}
+
 void QuadModel::InitMaterialBuffer()
 {
 	HRESULT hr;

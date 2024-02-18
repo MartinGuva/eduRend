@@ -81,6 +81,8 @@ class OurTestScene : public Scene
 	ID3D11Buffer* lightCam_buffer = nullptr;
 
 	ID3D11SamplerState* sampler = nullptr;
+
+	ID3D11SamplerState* skyboxSampler = nullptr;
 	// + other CBuffers
 
 	//
@@ -98,6 +100,8 @@ class OurTestScene : public Scene
 	Model* m_boxModel3;
 	Model* m_boxModel4;
 
+	Model* skyboxModel;
+
 
 	mat4f m_sponza_transform;
 	mat4f m_quad_transform;
@@ -111,6 +115,7 @@ class OurTestScene : public Scene
 	mat4f m_boxModel3_transform;
 	mat4f m_boxModel4_transform;
 
+	mat4f skyboxTransform;
 
 	mat4f m_view_matrix;
 	mat4f m_projection_matrix;

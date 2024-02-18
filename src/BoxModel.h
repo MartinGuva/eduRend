@@ -12,7 +12,7 @@ public:
 	 * @param dxdevice_context Valid ID3D11DeviceContext.
 	*/
 	BoxModel(ID3D11Device* dxdevice, ID3D11DeviceContext* dxdevice_context);
-
+	  
 	/**
 	 * @brief Render the model.
 	*/
@@ -24,6 +24,6 @@ public:
 	/**
 	 *@brief Destructor.
 	*/
-	~BoxModel() { }
+	~BoxModel();
 };
 

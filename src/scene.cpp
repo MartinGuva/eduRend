@@ -3,6 +3,7 @@
 #include "QuadModel.h"
 #include "BoxModel.h"
 #include "OBJModel.h"
+#include "Skybox.h"
 
 Scene::Scene(
 	ID3D11Device* dxdevice,
@@ -32,10 +33,28 @@ OurTestScene::OurTestScene(
 { 
 	InitTransformationBuffer();
 	InitLightCamBuffer();
+
 	D3D11_SAMPLER_DESC samplerdesc = UpdateFilter(D3D11_FILTER_MIN_MAG_MIP_POINT);
 	m_dxdevice->CreateSamplerState(&samplerdesc, &sampler);
 	m_dxdevice_context->PSSetSamplers(0, 1, &sampler);
-	//m_dxdevice_context->PSSetSamplers(1, 1, &sampler);
+
+
+
+	D3D11_SAMPLER_DESC samplerdescSkybox =
+	{
+	D3D11_FILTER_MIN_MAG_MIP_LINEAR, // Filter
+	D3D11_TEXTURE_ADDRESS_CLAMP, // AddressU
+	D3D11_TEXTURE_ADDRESS_CLAMP, // AddressV
+	D3D11_TEXTURE_ADDRESS_CLAMP, // AddressW
+	0.0f, // MipLODBias
+	16, // MaxAnisotropy
+	D3D11_COMPARISON_NEVER, // ComapirsonFunc
+	{ 1.0f, 1.0f, 1.0f, 1.0f }, // BorderColor
+	-FLT_MAX, // MinLOD
+	FLT_MAX, // MaxLOD
+	};
+	m_dxdevice->CreateSamplerState(&samplerdescSkybox, &skyboxSampler);
+	m_dxdevice_context->PSSetSamplers(1, 1, &skyboxSampler);
 	// + init other CBuffers
 }
 
@@ -62,6 +81,7 @@ void OurTestScene::Init()
 	m_boxModel2 = new BoxModel(m_dxdevice, m_dxdevice_context);
 	m_boxModel3 = new BoxModel(m_dxdevice, m_dxdevice_context);
 	m_boxModel4 = new BoxModel(m_dxdevice, m_dxdevice_context);
+	skyboxModel = new Skybox(m_dxdevice, m_dxdevice_context);
 
 
 
@@ -184,6 +204,11 @@ void OurTestScene::Update(
 
 
 
+
+	skyboxTransform = mat4f::translation(0, -10, 0) *
+		mat4f::rotation(0.0f, 0.0f, 0.0f) *
+		mat4f::scaling(20, 20, 20);
+
 	// Increment the rotation angle.
 	m_angle += m_angular_velocity * dt;
 	lightPosZ += lightSpeed * dt;
@@ -251,6 +276,10 @@ void OurTestScene::Render()
 
 	UpdateTransformationBuffer(m_boxModel4_transform, m_view_matrix, m_projection_matrix);
 	m_boxModel4->Render();
+
+	UpdateTransformationBuffer(skyboxTransform, m_view_matrix, m_projection_matrix);
+	//skyboxModel->Render();
+
 }
 
 void OurTestScene::Release()
@@ -263,7 +292,8 @@ void OurTestScene::Release()
 	SAFE_DELETE(m_boxModel4);
 	SAFE_DELETE(m_camera);
 	SAFE_DELETE(m_trojan);
-
+	SAFE_DELETE(skyboxModel);
+	SAFE_DELETE(m_woodDoll);
 
 	SAFE_RELEASE(m_transformation_buffer);
 	SAFE_RELEASE(lightCam_buffer);
