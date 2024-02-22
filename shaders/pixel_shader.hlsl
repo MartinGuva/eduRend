@@ -18,6 +18,7 @@ cbuffer MaterialBuffer : register(b1)
     float4 ambientColor; // w does not contain anything
     float4 diffuseColor; // w does not contain anything
     float4 specularColor; // w contains shinyness
+    int skyBox;
 };
 
 struct PSIn
@@ -37,75 +38,57 @@ struct PSIn
 
 float4 PS_main(PSIn input) : SV_Target
 {
-
-    
+    float4 diffuseTexture = texDiffuse.Sample(texSampler, input.TexCoord);
     // Set up normal map
-    
-    
-    float3x3 TBN = float3x3(normalize(input.Tangent), normalize(input.Binormal), normalize(input.Normal));
-    
-    TBN = transpose(TBN);
-
-    float3 sampledNormal = normalMap.Sample(texSampler, input.TexCoord).xyz;
+    float3 sampledNormal = normalMap.Sample(texSampler, input.TexCoord).rgb;
     sampledNormal = (sampledNormal * 2.0) - 1.0;
     sampledNormal = normalize(sampledNormal);
     
-    float3 newNormal = mul(TBN, sampledNormal);
     
+    float3 T = normalize(input.Tangent);
+    float3 B = normalize(input.Binormal);
+    float3 N = normalize(input.Normal);
+    float3x3 TBN = transpose(float3x3(T, B, N));
+
+    float3 newNormal;
+    
+    if (skyBox == 0)
+    {
+        newNormal = normalize(mul(TBN, sampledNormal));
+    }
+    else if (skyBox == 1)
+    {
+        newNormal = N;
+    }
     
     // Set up light and cam vectors
 
-    float4 lightVector = normalize(lightPos - input.PosWorld);
-    float4 camVector = normalize(camPos - input.PosWorld);
-    
-    //Get textures
-    
-    float4 cubeTexture;
-    
-    cubeTexture = skyboxTexture.Sample(skyboxSampler, camVector.xyz);
-    
-    float4 diffuseTexture;
-    diffuseTexture = texDiffuse.Sample(texSampler, input.TexCoord);
+    float3 lightVector = normalize(lightPos.xyz - input.PosWorld.xyz);
+    float3 camVector = normalize(camPos.xyz - input.PosWorld.xyz);
+        
 
+    float3 reflection = normalize(reflect(-lightVector, newNormal));
+    
+    float3 cubeReflect = normalize(reflect(camVector, newNormal));
 
-    //float3 cubeReflect = reflect(camVector.xyz, input.Normal);
+    float4 reflectionCube = skyboxTexture.Sample(skyboxSampler, cubeReflect);
 
-    //float4 reflectionCube;
-    //reflectionCube = skyboxTexture.Sample(skyboxSampler, cubeReflect);
-    
-    
-    
+    float4 diffuse = diffuseTexture * max(0.0f, dot(lightVector, N));
+    float4 specular = (reflectionCube * 0.5) * pow(max(0.0f, dot(reflection, camVector)), 5);
     
 
     
-    //start With normalMap:
     
-    //float4 diffuse = max(diffuseTexture * dot(lightVector, float4(newNormal, 0)), 0);
-    
-    //float4 reflection = float4(reflect(-lightVector.xyz, newNormal), 0);
-    
+    if (skyBox == 1)
+    {
+        diffuse = skyboxTexture.Sample(skyboxSampler, camVector);
+        specular = 0;
+    }
+    //specular += (reflectionCube * 0.025);
 
-    // end with normal Map
+    return (ambientColor * 0.4) + (diffuse * 0.8) + (specular * 0.3);
     
     
-    //start Without normalMap:
-    
-    float4 diffuse = max(diffuseTexture * dot(lightVector, float4(input.Normal, 0)), 0);
-    
-    float4 reflection = float4(reflect(-lightVector.xyz, input.Normal), 0);
-    
-    // end without normal map
-    
-    
-    float4 specular = specularColor * pow(max(0.0, dot(reflection, camVector)), specularColor.w);
-    
-    
-    //// Only have this here for reflection:
-    //specular *= reflectionCube;
-    ////
-    float4 phong = (ambientColor * 0.4) + (diffuse * 0.8) + (specular * 0.4);
-	
-    return phong;
 }
 
 

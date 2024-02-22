@@ -28,4 +28,5 @@ struct MaterialBuffer
 	linalg::vec4f ambientColor;// w does not contain anything
 	linalg::vec4f diffuseColor; // w does not contain anything
 	linalg::vec4f specularColor; // w contains shinyness
+	alignas(16) int skybox;
 };

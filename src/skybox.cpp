@@ -293,12 +293,13 @@ void Skybox::Render() const
 
 	// Bind our index buffer
 	m_dxdevice_context->IASetIndexBuffer(m_index_buffer, DXGI_FORMAT_R32_UINT, 0);
+	m_dxdevice_context->PSSetConstantBuffers(1, 1, &m_material_buffer);
 
 	m_dxdevice_context->PSSetShaderResources(2, 1, &cube_texture.TextureView);
 
 	for (auto& material : m_materials)
 	{
-		UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 1), linalg::vec4f(material.DiffuseColour, 1), linalg::vec4f(material.SpecularColour, 20));
+		UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 1), linalg::vec4f(material.DiffuseColour, 1), linalg::vec4f(material.SpecularColour, 20), 1);
 	}
 
 
@@ -332,7 +333,7 @@ void Skybox::Swap(unsigned& a, unsigned& b)
 }
 
 
-void Skybox::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular) const
+void Skybox::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular, int isSkybox) const
 {
 	// Map the resource buffer, obtain a pointer and then write our vectors to it
 	D3D11_MAPPED_SUBRESOURCE resource;
@@ -341,5 +342,6 @@ void Skybox::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, 
 	materialBufferData->ambientColor = ambient;
 	materialBufferData->diffuseColor = diffuse;
 	materialBufferData->specularColor = specular;
+	materialBufferData->skybox = isSkybox;
 	m_dxdevice_context->Unmap(m_material_buffer, 0);
 }

@@ -281,7 +281,7 @@ void BoxModel::Render() const
 
 	for (auto& material : m_materials)
 	{
-		UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 1), linalg::vec4f(material.DiffuseColour, 1), linalg::vec4f(material.SpecularColour, 20));
+		UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 1), linalg::vec4f(material.DiffuseColour, 1), linalg::vec4f(material.SpecularColour, 20), 0);
 	}
 
 	m_dxdevice_context->DrawIndexed(m_number_of_indices, 0, 0);
@@ -311,7 +311,7 @@ void BoxModel::InitMaterialBuffer()
 }
 
 
-void BoxModel::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular) const
+void BoxModel::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular, int isSkybox) const
 {
 	// Map the resource buffer, obtain a pointer and then write our vectors to it
 	D3D11_MAPPED_SUBRESOURCE resource;
@@ -320,5 +320,6 @@ void BoxModel::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse
 	materialBufferData->ambientColor = ambient;
 	materialBufferData->diffuseColor = diffuse;
 	materialBufferData->specularColor = specular;
+	materialBufferData->skybox = isSkybox;
 	m_dxdevice_context->Unmap(m_material_buffer, 0);
 }

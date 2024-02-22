@@ -115,7 +115,7 @@ void QuadModel::Render() const
 
 	for (auto& material : m_materials)
 	{
-		UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 0), linalg::vec4f(material.DiffuseColour, 0), linalg::vec4f(material.SpecularColour, 20));
+		UpdateMaterialBuffer(linalg::vec4f(material.AmbientColour, 0), linalg::vec4f(material.DiffuseColour, 0), linalg::vec4f(material.SpecularColour, 20), 0);
 	}
 	
 
@@ -148,7 +148,7 @@ void QuadModel::InitMaterialBuffer()
 }
 
 
-void QuadModel::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular) const
+void QuadModel::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular, int isSkybox) const
 {
 	// Map the resource buffer, obtain a pointer and then write our vectors to it
 	D3D11_MAPPED_SUBRESOURCE resource;
@@ -157,5 +157,6 @@ void QuadModel::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffus
 	materialBufferData->ambientColor = ambient;
 	materialBufferData->diffuseColor = diffuse;
 	materialBufferData->specularColor = specular;
+	materialBufferData->skybox = isSkybox;
 	m_dxdevice_context->Unmap(m_material_buffer, 0);
 }

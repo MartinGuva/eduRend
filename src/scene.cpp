@@ -205,9 +205,9 @@ void OurTestScene::Update(
 
 
 
-	skyboxTransform = mat4f::translation(0, -10, 0) *
+	skyboxTransform = mat4f::translation(-100, -100, 100) *
 		mat4f::rotation(0.0f, 0.0f, 0.0f) *
-		mat4f::scaling(20, 20, 20);
+		mat4f::scaling(200, 200, 200);
 
 	// Increment the rotation angle.
 	m_angle += m_angular_velocity * dt;
@@ -278,7 +278,7 @@ void OurTestScene::Render()
 	m_boxModel4->Render();
 
 	UpdateTransformationBuffer(skyboxTransform, m_view_matrix, m_projection_matrix);
-	//skyboxModel->Render();
+	skyboxModel->Render();
 
 }
 

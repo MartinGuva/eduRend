@@ -38,7 +38,7 @@ protected:
 
 
 
-	virtual void UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular) const = 0;
+	virtual void UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular, int isSkybox) const = 0;
 	virtual void InitMaterialBuffer() = 0;
 public:
 
@@ -61,29 +61,17 @@ public:
 
 		vec3f D = v1.Position - v0.Position;
 		vec3f E = v2.Position - v0.Position;
+
 		vec2f F = v1.TexCoord - v0.TexCoord;
 		vec2f G = v2.TexCoord - v0.TexCoord;
 
-		float inverse = 1.0f / (F.x * G.y - G.x * F.y);
+		float det = 1 / (F.x * G.y - F.y * G.x);
 
-		tangent.x = inverse * (G.y * D.x - F.y * E.x);
-		tangent.y = inverse * (G.y * D.y - F.y * E.y);
-		tangent.z = inverse * (G.y * D.z - F.y * E.z);
-		tangent = normalize(tangent);
+		tangent = normalize((D * G.y + E * -F.y) * det);
+		binormal = normalize((D * -G.x + E * F.x) * det);
 
-		binormal.x = inverse * (-G.x * D.x + F.x * E.x);
-		binormal.y = inverse * (-G.x * D.y + F.x * E.y);
-		binormal.z = inverse * (-G.x * D.z + F.x * E.z);
-		binormal = normalize(binormal);
-
-
-		// Now assign the newly computed vectors to the vertices
-		v0.Tangent = tangent;
-		v1.Tangent = tangent;
-		v2.Tangent = tangent;
-		v0.Binormal = binormal;
-		v1.Binormal = binormal;
-		v2.Binormal = binormal;
+		v0.Tangent = v1.Tangent = v2.Tangent = tangent;
+		v0.Binormal = v1.Binormal = v2.Binormal = binormal;
 	}
 
 

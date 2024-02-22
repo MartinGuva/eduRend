@@ -136,7 +136,7 @@ void OBJModel::Render() const
 		m_dxdevice_context->PSSetShaderResources(1, 1, &material.NormalTexture.TextureView);
 
 
-		UpdateMaterialBuffer(linalg::vec4f(m_materials[indexRange.MaterialIndex].AmbientColour, 1), linalg::vec4f(m_materials[indexRange.MaterialIndex].DiffuseColour, 1), linalg::vec4f(m_materials[indexRange.MaterialIndex].SpecularColour, 5));
+		UpdateMaterialBuffer(linalg::vec4f(m_materials[indexRange.MaterialIndex].AmbientColour, 1), linalg::vec4f(m_materials[indexRange.MaterialIndex].DiffuseColour, 1), linalg::vec4f(m_materials[indexRange.MaterialIndex].SpecularColour, 20), 0);
 		
 		// Make the drawcall
 		m_dxdevice_context->DrawIndexed(indexRange.Size, indexRange.Start, 0);
@@ -150,8 +150,6 @@ OBJModel::~OBJModel()
 	{
 		SAFE_RELEASE(material.DiffuseTexture.TextureView);
 		SAFE_RELEASE(material.NormalTexture.TextureView);
-
-		// Release other used textures ...
 	}
 }
 
@@ -169,7 +167,7 @@ void OBJModel::InitMaterialBuffer()
 }
 
 
-void OBJModel::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular) const
+void OBJModel::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse, linalg::vec4f specular, int isSkybox) const
 {
 	// Map the resource buffer, obtain a pointer and then write our vectors to it
 	D3D11_MAPPED_SUBRESOURCE resource;
@@ -178,5 +176,6 @@ void OBJModel::UpdateMaterialBuffer(linalg::vec4f ambient, linalg::vec4f diffuse
 	materialBufferData->ambientColor = ambient;
 	materialBufferData->diffuseColor = diffuse;
 	materialBufferData->specularColor = specular;
+	materialBufferData->skybox = isSkybox;
 	m_dxdevice_context->Unmap(m_material_buffer, 0);
 }
