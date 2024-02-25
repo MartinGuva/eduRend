@@ -41,8 +41,7 @@ float4 PS_main(PSIn input) : SV_Target
     float4 diffuseTexture = texDiffuse.Sample(texSampler, input.TexCoord);
     // Set up normal map
     float3 sampledNormal = normalMap.Sample(texSampler, input.TexCoord).rgb;
-    sampledNormal = (sampledNormal * 2.0) - 1.0;
-    sampledNormal = normalize(sampledNormal);
+    sampledNormal = normalize((sampledNormal * 2.0) - 1.0);
     
     
     float3 T = normalize(input.Tangent);
