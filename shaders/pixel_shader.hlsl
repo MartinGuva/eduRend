@@ -38,15 +38,17 @@ struct PSIn
 
 float4 PS_main(PSIn input) : SV_Target
 {
+    
+    
     float4 diffuseTexture = texDiffuse.Sample(texSampler, input.TexCoord);
     // Set up normal map
     float3 sampledNormal = normalMap.Sample(texSampler, input.TexCoord).rgb;
     sampledNormal = normalize((sampledNormal * 2.0) - 1.0);
     
     
-    float3 T = normalize(input.Tangent);
-    float3 B = normalize(input.Binormal);
-    float3 N = normalize(input.Normal);
+    float3 T = input.Tangent;
+    float3 B = input.Binormal;
+    float3 N = input.Normal;
     float3x3 TBN = transpose(float3x3(T, B, N));
 
     float3 newNormal;
@@ -64,28 +66,27 @@ float4 PS_main(PSIn input) : SV_Target
 
     float3 lightVector = normalize(lightPos.xyz - input.PosWorld.xyz);
     float3 camVector = normalize(camPos.xyz - input.PosWorld.xyz);
-        
-
-    float3 reflection = normalize(reflect(-lightVector, newNormal));
     
-    float3 cubeReflect = normalize(reflect(camVector, newNormal));
-
+    float3 cubeReflect = normalize(reflect(camVector.xyz, input.Normal));
     float4 reflectionCube = skyboxTexture.Sample(skyboxSampler, cubeReflect);
 
-    float4 diffuse = diffuseTexture * max(0.0f, dot(lightVector, N));
-    float4 specular = (reflectionCube * 0.5) * pow(max(0.0f, dot(reflection, camVector)), 5);
+    
     
 
+    float3 reflection = normalize(reflect(-lightVector, input.Normal));
+    float4 diffuse = diffuseTexture * max(0.0f, dot(lightVector, input.Normal));
+    float4 specular = specularColor * pow(max(0.0, dot(reflection, camVector)), specularColor.w);
+    
+    specular *= (reflectionCube * 0.7);
     
     
     if (skyBox == 1)
     {
         diffuse = skyboxTexture.Sample(skyboxSampler, camVector);
-        specular = 0;
     }
-    //specular += (reflectionCube * 0.025);
+    
 
-    return (ambientColor * 0.4) + (diffuse * 0.8) + (specular * 0.3);
+    return (ambientColor * 0.4) + (diffuse * 0.9) + (specular * 0.5);
     
     
 }
